@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register | CollabX</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  
+  <!-- Custom Fonts & Scrollbar Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-emerald-800 transition duration-300">
+          C
+        </div>
+        <span class="font-serif text-2xl font-bold tracking-tight text-stone-900">CollabX</span>
+      </a>
+      <div class="flex items-center gap-6">
+        <a href="index.html" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition duration-300">Back to Home</a>
+        <a href="login.html" class="text-sm font-semibold bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-2.5 rounded-full shadow-sm transition duration-300">
+          Sign In
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Register Form Section -->
+  <main class="flex-grow flex items-center justify-center py-12 px-6">
+    <div class="w-full max-w-2xl bg-white rounded-3xl border border-stone-200 p-8 sm:p-10 shadow-sm">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl sm:text-4xl font-serif font-bold text-stone-900 mb-2">Create Account</h1>
+        <p class="text-sm text-stone-600">Join CollabX to connect ideas, capital, and execution skills.</p>
+      </div>
+
+      <form id="registerForm" class="space-y-6">
+        <!-- Basic User Details -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Full Name *</label>
+            <input type="text" name="name" required placeholder="John Doe" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Phone Number *</label>
+            <input type="tel" name="phone" required placeholder="01700000000" pattern="01[0-9]{9}" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Email Address *</label>
+          <input type="email" name="email" required placeholder="john@example.com" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Password *</label>
+            <input type="password" name="password" id="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Confirm Password *</label>
+            <input type="password" id="confirmPassword" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+          </div>
+        </div>
+
+        <!-- Role Selector -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Select Your Primary Role *</label>
+          <div class="grid grid-cols-3 gap-3">
+            <label class="cursor-pointer">
+              <input type="radio" name="primary_role" value="idea_owner" checked class="peer sr-only" onchange="handleRoleChange('idea_owner')">
+              <div class="text-center py-3 px-2 rounded-xl border border-stone-200 bg-stone-50 peer-checked:border-emerald-700 peer-checked:bg-emerald-50/50 peer-checked:text-emerald-800 text-xs font-semibold transition">
+                Idea Owner
+              </div>
+            </label>
+
+            <label class="cursor-pointer">
+              <input type="radio" name="primary_role" value="investor" class="peer sr-only" onchange="handleRoleChange('investor')">
+              <div class="text-center py-3 px-2 rounded-xl border border-stone-200 bg-stone-50 peer-checked:border-emerald-700 peer-checked:bg-emerald-50/50 peer-checked:text-emerald-800 text-xs font-semibold transition">
+                Investor
+              </div>
+            </label>
+
+            <label class="cursor-pointer">
+              <input type="radio" name="primary_role" value="manpower" class="peer sr-only" onchange="handleRoleChange('manpower')">
+              <div class="text-center py-3 px-2 rounded-xl border border-stone-200 bg-stone-50 peer-checked:border-emerald-700 peer-checked:bg-emerald-50/50 peer-checked:text-emerald-800 text-xs font-semibold transition">
+                Manpower
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Dynamic Role Qualification Fields -->
+
+        <!-- 1. Idea Owner Qualifications -->
+        <div id="ideaOwnerFields" class="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-800 border-b border-stone-200 pb-2">Idea Owner Qualifications</h3>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Primary Idea Title *</label>
+            <input type="text" name="idea_title" placeholder="e.g. AgriTech Automated Distribution Platform" class="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Category / Industry</label>
+              <select name="category" class="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+                <option value="AgriTech">AgriTech</option>
+                <option value="FinTech">FinTech</option>
+                <option value="HealthTech">HealthTech</option>
+                <option value="EdTech">EdTech</option>
+                <option value="SaaS">SaaS</option>
+                <option value="E-commerce">E-commerce</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Estimated Budget Needed (৳)</label>
+              <input type="number" name="required_budget" placeholder="e.g. 500000" class="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Brief Summary of Idea</label>
+            <textarea name="idea_summary" rows="2" placeholder="Briefly describe what your startup project aims to solve..." class="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition"></textarea>
+          </div>
+        </div>
+
+        <!-- 2. Investor Qualifications -->
+        <div id="investorFields" class="hidden p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-800 border-b border-stone-200 pb-2">Investor Qualifications</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Investment Capacity (৳) *</label>
+              <input type="number" name="investment_capacity" placeholder="e.g. 1000000" class="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Preferred Risk Level</label>
+              <select name="risk_level" class="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+                <option value="Low">Low Risk</option>
+                <option value="Medium" selected>Medium Risk</option>
+                <option value="High">High Risk</option>
+              </select>
+            </div>
+          </div>
+          <!-- <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Target Sectors</label>
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <label class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-stone-200 cursor-pointer">
+                <input type="checkbox" name="target_sectors[]" value="FinTech" class="accent-emerald-700" checked> FinTech
+              </label>
+              <label class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-stone-200 cursor-pointer">
+                <input type="checkbox" name="target_sectors[]" value="AgriTech" class="accent-emerald-700" checked> AgriTech
+              </label>
+              <label class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-stone-200 cursor-pointer">
+                <input type="checkbox" name="target_sectors[]" value="HealthTech" class="accent-emerald-700"> HealthTech
+              </label>
+            </div>
+          </div> -->
+        </div>
+
+        <!-- 3. Manpower Qualifications -->
+        <div id="manpowerFields" class="hidden p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-800 border-b border-stone-200 pb-2">Manpower Qualifications</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Years of Experience *</label>
+              <input type="number" step="0.5" name="experience" placeholder="e.g. 3.5" class="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Proficiency Level</label>
+              <select name="proficiency" class="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate" selected>Intermediate</option>
+                <option value="Expert">Expert</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Select Your Core Skills *</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+              <label class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-stone-200 cursor-pointer">
+                <input type="checkbox" name="skills[]" value="Web Development" class="accent-emerald-700"> Web Development
+              </label>
+              <label class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-stone-200 cursor-pointer">
+                <input type="checkbox" name="skills[]" value="UI/UX Design" class="accent-emerald-700"> UI/UX Design
+              </label>
+              <label class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-stone-200 cursor-pointer">
+                <input type="checkbox" name="skills[]" value="Mobile App Development" class="accent-emerald-700"> Mobile App Dev
+              </label>
+              <label class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-stone-200 cursor-pointer">
+                <input type="checkbox" name="skills[]" value="Digital Marketing" class="accent-emerald-700"> Digital Marketing
+              </label>
+              <label class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-stone-200 cursor-pointer">
+                <input type="checkbox" name="skills[]" value="Backend Development" class="accent-emerald-700"> Backend Dev
+              </label>
+              <label class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-stone-200 cursor-pointer">
+                <input type="checkbox" name="skills[]" value="DevOps" class="accent-emerald-700"> DevOps
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Portfolio / Facebook / LinkedIn Link</label>
+            <input type="url" name="portfolio" placeholder="https://Facebook.com/username" class="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-3.5 rounded-xl shadow-sm transition duration-300">
+          Complete Registration
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-xs text-stone-500">
+        Already have an account? <a href="login.html" class="text-emerald-700 font-semibold hover:underline">Log in here</a>
+      </p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+  
+  <script src="assets/js/app.js"></script>
+  <script>
+    // Show only the fields of the selected role. Hidden fields are disabled so they are not sent.
+    function handleRoleChange(role) {
+      const sections = { idea_owner: 'ideaOwnerFields', investor: 'investorFields', manpower: 'manpowerFields' };
+      Object.entries(sections).forEach(([r, id]) => {
+        const box = document.getElementById(id);
+        if (!box) return;
+        const show = r === role;
+        box.classList.toggle('hidden', !show);
+        box.querySelectorAll('input, select, textarea').forEach((el) => (el.disabled = !show));
+      });
+      const requiredByRole = { idea_owner: ['idea_title', 'required_budget'], investor: ['investment_capacity'], manpower: [] };
+      Object.values(requiredByRole).flat().forEach((n) => {
+        const el = document.querySelector('[name="' + n + '"]');
+        if (el) el.required = (requiredByRole[role] || []).includes(n);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const checked = document.querySelector('input[name="primary_role"]:checked');
+      handleRoleChange(checked ? checked.value : 'idea_owner');
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const confirmValue = document.getElementById('confirmPassword').value;
+
+      if (document.getElementById('password').value !== confirmValue) {
+        App.toast('Passwords do not match.', 'error');
+        return;
+      }
+
+      const data = new FormData(form);
+      data.append('confirm_password', confirmValue);
+
+      const button = form.querySelector('button[type="submit"]');
+      App.setBusy(button, true, 'Creating account...');
+      const res = await App.api('auth/register.php', { method: 'POST', data });
+      App.setBusy(button, false);
+
+      if (res.status === 200 || res.status === 201) {
+        App.toast(res.message, 'success');
+        setTimeout(() => (window.location.href = res.data.redirect || 'login.html'), 1800);
+      } else {
+        App.toast(res.message, 'error');
+      }
+    });
+  </script>
+</body>
+</html>

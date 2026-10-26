@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investor Dashboard | CollabX</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  
+  <!-- Custom Fonts & Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-require-role="investor" class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Shared Top Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-emerald-800 transition duration-300">
+          C
+        </div>
+        <span class="font-serif text-2xl font-bold tracking-tight text-stone-900">CollabX</span>
+      </a>
+
+      <!-- Right Side Profile & Actions -->
+      <div class="flex items-center gap-5">
+        
+        <!-- Notification Bell & Dropdown Wrapper -->
+        <div class="relative">
+          <button id="notif-btn" onclick="toggleNotificationDropdown()" class="relative p-2.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 transition duration-200 focus:outline-none" title="Notifications">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <!-- Live Unread Badge Counter -->
+            <span id="notif-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ring-2 ring-stone-50 min-w-[18px] text-center">0</span>
+          </button>
+
+          <!-- Notification Dropdown Panel -->
+          <div id="notif-dropdown" class="hidden absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-stone-200 z-50 overflow-hidden">
+            <div class="p-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+              <h4 class="text-sm font-bold text-stone-900">Notifications</h4>
+              <button onclick="markAllNotificationsAsRead()" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition">Mark all as read</button>
+            </div>
+
+            <!-- Notification List Container -->
+            <div id="notif-list" class="max-h-80 overflow-y-auto divide-y divide-stone-100">
+              <div class="p-4 text-center text-xs text-stone-400">Loading notifications...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 pl-2 border-l border-stone-200">
+          <div class="user-avatar-display w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm border border-emerald-300">
+            IN
+          </div>
+          <div class="hidden sm:block text-left">
+            <p class="user-name-display text-xs font-bold text-stone-900 leading-tight">Investor</p>
+            <p class="text-[10px] text-stone-500 font-medium">Investor</p>
+          </div>
+        </div>
+
+        <a href="login.html" class="text-xs font-semibold text-stone-500 hover:text-stone-900 ml-2 logout-btn" data-logout>Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Dashboard Content -->
+  <main class="max-w-7xl mx-auto px-6 py-10 flex-grow w-full space-y-10">
+
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-6">
+      <div>
+        <h1 class="text-3xl font-serif font-bold text-stone-900">Investor Dashboard</h1>
+        <p class="text-sm text-stone-600">Discover promising high-growth startups, commit funding, and monitor ROI.</p>
+      </div>
+      <a href="wallet.html" id="header-wallet-btn" class="inline-flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm px-5 py-3 rounded-xl shadow-sm transition duration-300">
+        Investor Wallet (<span class="live-wallet-balance">৳0</span>)
+      </a>
+    </div>
+
+   <!-- Stat Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="p-6 rounded-2xl bg-white border border-stone-200 shadow-sm flex flex-col justify-between">
+    <span class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">Total Invested</span>
+    <div class="flex items-baseline justify-between">
+      <span id="statTotalInvested" class="text-3xl font-serif font-bold text-stone-900">৳0</span>
+      <span id="statActiveProjects" class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">0 Active Projects</span>
+    </div>
+  </div>
+
+  <div class="p-6 rounded-2xl bg-white border border-stone-200 shadow-sm flex flex-col justify-between">
+    <span class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">Wallet Balance</span>
+    <div class="flex items-baseline justify-between">
+      <span id="statWalletBalance" class="text-3xl font-serif font-bold text-emerald-700 live-wallet-balance">৳0</span>
+      <span class="text-xs text-stone-500 font-medium">Available Cash</span>
+    </div>
+  </div>
+
+  <div class="p-6 rounded-2xl bg-white border border-stone-200 shadow-sm flex flex-col justify-between">
+    <span class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">Reputation Rating</span>
+    <div class="flex flex-col">
+      <span class="text-3xl font-serif font-bold text-stone-900">4.9 / 5.0</span>
+      <span class="text-xs text-stone-500">Verified Angel Investor</span>
+    </div>
+  </div>
+</div>
+
+    <!-- Table 0: Active Investment Offers & Counter Offers (NEW INTEGRATED SECTION) -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-4">
+        <div>
+          <h2 class="text-xl font-serif font-bold text-stone-900">Active Offers & Counter Negotiations</h2>
+          <p class="text-xs text-stone-500">Review your active proposals, counter-offers from Idea Owners, and take action.</p>
+        </div>
+        <span id="activeOffersBadge" class="px-3 py-1 text-xs font-bold bg-amber-100 text-amber-800 rounded-full">0 Active</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stone-200 text-xs font-bold uppercase tracking-wider text-stone-500">
+              <th class="py-3 px-4">Project Title</th>
+              <th class="py-3 px-4">Your Offer</th>
+              <th class="py-3 px-4">Status / Counter Offer</th>
+              <th class="py-3 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="myCommitmentsTableBody" class="divide-y divide-stone-100 text-sm">
+            <tr>
+              <td colspan="4" class="py-6 text-center text-stone-400 font-medium">Loading your offers & counter negotiations...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Table 1: Explore Investment Opportunities -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-serif font-bold text-stone-900">Explore High-Yield Projects</h2>
+          <p class="text-xs text-stone-500">Verified startups looking for equity/debt investment.</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stone-200 text-xs font-bold uppercase tracking-wider text-stone-500">
+              <th class="py-3 px-4">Project Title</th>
+              <th class="py-3 px-4">Category</th>
+              <th class="py-3 px-4">Funding Target</th>
+              <th class="py-3 px-4 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="investorExploreProjects" class="divide-y divide-stone-100 text-sm">
+            <tr>
+              <td colspan="4" class="py-6 text-center text-stone-400 font-medium">Loading live approved projects...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Table 2: My Active Investment Portfolio -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-serif font-bold text-stone-900">My Investment Portfolio</h2>
+        <span class="text-xs text-stone-500 font-medium">Active Deals</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stone-200 text-xs font-bold uppercase tracking-wider text-stone-500">
+              <th class="py-3 px-4">Project</th>
+              <th class="py-3 px-4">Invested Amount</th>
+              <th class="py-3 px-4">Escrow Status</th>
+              <th class="py-3 px-4">Expected ROI</th>
+            </tr>
+          </thead>
+          <tbody id="portfolio-table-body" class="divide-y divide-stone-100 text-sm">
+            <tr>
+              <td colspan="4" class="py-6 text-center text-stone-400 font-medium">Loading your portfolio...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Table 3: Wallet Ledger & Transaction History -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-serif font-bold text-stone-900">Wallet & Payout Ledger</h2>
+          <p class="text-xs text-stone-500">Recent profit payouts, deposits, and withdrawal records.</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stone-200 text-xs font-bold uppercase tracking-wider text-stone-500">
+              <th class="py-3 px-4">TRX ID</th>
+              <th class="py-3 px-4">Type</th>
+              <th class="py-3 px-4">Amount</th>
+              <th class="py-3 px-4">Reference</th>
+              <th class="py-3 px-4 text-right">Date</th>
+            </tr>
+          </thead>
+          <tbody id="transaction-table-body" class="divide-y divide-stone-100 text-sm">
+            <tr>
+              <td colspan="5" class="py-6 text-center text-stone-400 font-medium">Loading transaction ledger...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Investment Proposal Modal -->
+  <div id="investModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <h3 class="text-xl font-bold text-stone-900 mb-2">Send Investment Proposal</h3>
+      <p id="modalProjectTitle" class="text-xs font-semibold text-emerald-700 mb-4"></p>
+
+      <form id="investForm" onsubmit="handleSendInvestment(event)">
+        <input type="hidden" id="modalProjectId" />
+        
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Investment Amount (BDT)</label>
+          <input type="number" id="investAmount" required placeholder="e.g. 50000" class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" />
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Expected Equity (%)</label>
+          <input type="number" step="0.1" id="investEquity" placeholder="e.g. 10" class="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm" />
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <button type="button" onclick="closeInvestModal()" class="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-lg text-xs transition">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold rounded-lg text-xs transition">Submit Proposal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+<script src="assets/js/app.js"></script>
+<script>
+let loggedInInvestor = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Auth Guard
+    if (typeof App !== 'undefined' && App.guard) {
+        loggedInInvestor = await App.guard(['investor']);
+    }
+    
+    // Fallback Investor ID
+    const investorId = loggedInInvestor ? (loggedInInvestor.user_id || loggedInInvestor.id) : 3;
+
+    if (loggedInInvestor) {
+        // Update User Name
+        const nameElements = document.querySelectorAll('.user-name-display');
+        if (nameElements.length > 0) {
+            nameElements.forEach(el => el.innerText = loggedInInvestor.name || 'Investor');
+        }
+
+        // Update User Initials
+        const avatarEl = document.querySelector('.user-avatar-display');
+        if (avatarEl && loggedInInvestor.name) {
+            const initials = loggedInInvestor.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            avatarEl.innerText = initials.substring(0, 2);
+        }
+    }
+
+    // Pass investorId to all dynamic loaders
+    loadMyCommitments(investorId); // Dynamic Counter Offer & Negotiations
+    loadExploreProjects(investorId);
+    loadInvestorPortfolio(investorId);
+    loadInvestorWallet(investorId);
+    loadNotifications(investorId);
+});
+
+// --- 0. ACTIVE OFFERS & COUNTER NEGOTIATIONS (DYNAMIC BACKEND INTEGRATION) ---
+// Dynamic Active Offers & Counter Offers Fetcher
+// Helper to safely fetch JSON without throwing HTML 404 SyntaxError
+async function safeFetchJson(url) {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            return await res.json();
+        }
+    } catch (e) {
+        console.warn("Fetch error for:", url, e);
+    }
+    return null;
+}
+
+// Dynamic Active Offers & Counter Offers Fetcher
+async function loadMyCommitments(investorId) {
+    const tbody = document.getElementById('myCommitmentsTableBody');
+    const badge = document.getElementById('activeOffersBadge');
+    if (!tbody) return;
+
+    const currentInvestorId = investorId || (loggedInInvestor ? (loggedInInvestor.user_id || loggedInInvestor.id) : 3);
+
+    try {
+        // Correct API Path: api/agreements/negotiate.php
+        const response = await fetch(`api/agreements/negotiate.php?user_id=${currentInvestorId}`);
+        const result = await response.json();
+
+        let items = [];
+        if (result && (result.status === 200 || result.commitments)) {
+            items = result.commitments || result.negotiations || (result.data ? result.data.commitments : []) || [];
+        }
+
+        // Active অফার ফিল্টার (Accepted / Rejected / Completed বাদ যাবে)
+        items = items.filter(item => item.status !== 'accepted' && item.status !== 'rejected' && item.status !== 'completed');
+
+        if (badge) badge.innerText = `${items.length} Active`;
+
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-stone-400 font-medium">You have no active investment offers or counter-offers at the moment.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(item => {
+            const isCounterOffer = item.proposed_by === 'idea_owner' || item.proposed_by === 'owner' || item.status === 'counter_offered';
+            
+            const proposedAmt = Number(item.proposed_salary || item.amount || 0).toLocaleString();
+            const proposedEq = item.proposed_percentage || item.equity || 0;
+
+            return `
+            <tr class="hover:bg-stone-50/80 transition border-b border-stone-100">
+              <td class="py-4 px-4">
+                <p class="font-bold text-stone-900">${item.project_title || ('Project #' + item.project_id)}</p>
+                <p class="text-xs text-stone-500 font-normal">Owner: ${item.owner_name || 'Idea Owner'}</p>
+              </td>
+              <td class="py-4 px-4 font-bold text-stone-800">
+                ৳${proposedAmt} (${proposedEq}%)
+              </td>
+              <td class="py-4 px-4">
+                ${isCounterOffer ? `
+                  <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-900 rounded-xl text-xs font-bold shadow-sm">
+                    ⚡ Counter Offer Received
+                  </div>
+                ` : `
+                  <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-stone-100 text-stone-700 uppercase">${item.status || 'Pending'}</span>
+                `}
+              </td>
+              <td class="py-4 px-4 text-right space-x-2">
+                <a href="manage-agreement.html?project_id=${item.project_id}" class="text-xs font-bold text-emerald-700 hover:underline inline-flex items-center gap-1">
+                  View Details →
+                </a>
+              </td>
+            </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error("Error loading commitments:", err);
+        tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-stone-400 font-medium">You have no active investment offers or counter-offers at the moment.</td></tr>`;
+    }
+}
+
+// Accept Counter Offer -> Redirects to Digital Agreement
+async function acceptCounterOffer(projectId, negotiationId) {
+    if (!confirm("Are you sure you want to accept this counter offer?")) return;
+
+    const currentInvestorId = loggedInInvestor ? (loggedInInvestor.user_id || loggedInInvestor.id) : 3;
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'accept_proposal');
+        formData.append('project_id', projectId);
+        formData.append('negotiation_id', negotiationId);
+        formData.append('user_id', currentInvestorId);
+
+        const response = await fetch('api/agreements/negotiate.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result && (result.status === 200 || result.success)) {
+            if (typeof App !== 'undefined' && App.toast) {
+                App.toast("✅ Counter offer accepted! Redirecting to agreement...", "success");
+            } else {
+                alert("✅ Counter offer accepted! Redirecting to agreement...");
+            }
+
+            setTimeout(() => {
+                window.location.href = `manage-agreement.html?project_id=${projectId}`;
+            }, 1000);
+        } else {
+            const errorMsg = result ? result.message : "Failed to accept counter offer.";
+            if (typeof App !== 'undefined' && App.toast) {
+                App.toast("❌ " + errorMsg, "error");
+            } else {
+                alert("❌ " + errorMsg);
+            }
+        }
+    } catch (err) {
+        console.error("Error accepting counter offer:", err);
+    }
+}
+
+// Decline Counter Offer
+async function declineCounterOffer(negotiationId) {
+    if (!confirm("Are you sure you want to decline this counter offer?")) return;
+
+    const currentInvestorId = loggedInInvestor ? (loggedInInvestor.user_id || loggedInInvestor.id) : 3;
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'reject_proposal');
+        formData.append('negotiation_id', negotiationId);
+        formData.append('user_id', currentInvestorId);
+
+        const response = await fetch('api/agreements/negotiate.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result && (result.status === 200 || result.success)) {
+            if (typeof App !== 'undefined' && App.toast) {
+                App.toast("Counter offer declined.", "success");
+            } else {
+                alert("Counter offer declined.");
+            }
+            loadMyCommitments(currentInvestorId);
+        } else {
+            alert("Error declining counter offer.");
+        }
+    } catch (err) {
+        console.error("Error declining counter offer:", err);
+    }
+}
+
+// --- 1. EXPLORE PROJECTS (Uninvested Only) ---
+async function loadExploreProjects(investorId) {
+    const container = document.getElementById('investorExploreProjects');
+    if (!container) return;
+
+    const currentInvestorId = investorId || (loggedInInvestor ? (loggedInInvestor.user_id || loggedInInvestor.id) : 3);
+
+    try {
+        const response = await fetch(`api/investor/get_explore_projects.php?user_id=${currentInvestorId}`);
+        const result = await response.json();
+
+        if (result.status === 200 && Array.isArray(result.projects)) {
+            if (result.projects.length === 0) {
+                container.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-stone-500 font-medium">Sob project-e invest kora hoye geche! Kono nuton project nei.</td></tr>`;
+                return;
+            }
+
+            container.innerHTML = result.projects.map(p => `
+                <tr class="hover:bg-stone-50/80 transition border-b border-stone-100">
+                  <td class="py-4 px-4 font-semibold text-stone-900">
+                    ${p.title}
+                    <p class="text-xs text-stone-500 font-normal">By ${p.owner_name || 'Startup Owner'}</p>
+                  </td>
+                  <td class="py-4 px-4 font-medium text-stone-700">${p.category || 'General'}</td>
+                  <td class="py-4 px-4 font-bold text-stone-900">৳${Number(p.required_budget || 0).toLocaleString()}</td>
+                  <td class="py-4 px-4 text-right">
+                    <button onclick="openInvestModal(${p.project_id}, '${(p.title || '').replace(/'/g, "\\'")}')" class="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-4 py-2 rounded-lg transition shadow-sm">Invest Now</button>
+                  </td>
+                </tr>
+            `).join('');
+        } else {
+            container.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-rose-500 font-medium">Failed to load projects.</td></tr>`;
+        }
+    } catch (err) {
+        console.error("Error loading explore projects:", err);
+    }
+}
+
+// --- 2. INVESTOR PORTFOLIO (UPDATED WITH DYNAMIC CARD STATS) ---
+async function loadInvestorPortfolio(investorId) {
+    const tableBody = document.querySelector("#portfolio-table-body");
+
+    const currentInvestorId = investorId || (loggedInInvestor ? (loggedInInvestor.user_id || loggedInInvestor.id) : 3);
+
+    try {
+        const response = await fetch(`api/investments/my_portfolio.php?investor_id=${currentInvestorId}&user_id=${currentInvestorId}`);
+        const result = await response.json();
+
+        let items = [];
+        if (result.status === 200) {
+            if (Array.isArray(result.data)) items = result.data;
+            else if (Array.isArray(result.portfolio)) items = result.portfolio;
+            else if (Array.isArray(result.investments)) items = result.investments;
+            else if (Array.isArray(result)) items = result;
+        }
+
+        // ==================== DYNAMIC CARD CALCULATIONS ====================
+        let totalInvested = 0;
+        let activeProjectsCount = items.length;
+
+        items.forEach(item => {
+            totalInvested += Number(item.amount || 0);
+        });
+
+        // 1. Total Invested Amount Update
+        const totalInvestedElem = document.getElementById('statTotalInvested');
+        if (totalInvestedElem) {
+            totalInvestedElem.innerText = `৳${totalInvested.toLocaleString()}`;
+        }
+
+        // 2. Active Projects Count Update
+        const activeProjectsElem = document.getElementById('statActiveProjects');
+        if (activeProjectsElem) {
+            activeProjectsElem.innerText = `${activeProjectsCount} Active Projects`;
+        }
+        // ===================================================================
+
+        if (!tableBody) return;
+
+        if (items.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-stone-400 font-medium">No active portfolio investments found.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = items.map(item => {
+            const escrowStatus = (item.escrow_status || 'held').toLowerCase();
+            let escrowBadge = `<span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">Locked in Escrow</span>`;
+            
+            if (escrowStatus === 'released') {
+                escrowBadge = `<span class="px-3 py-1 text-xs font-semibold rounded-full bg-stone-100 text-stone-700">Released</span>`;
+            } else if (escrowStatus === 'refunded') {
+                escrowBadge = `<span class="px-3 py-1 text-xs font-semibold rounded-full bg-rose-100 text-rose-800">Refunded</span>`;
+            }
+
+            return `
+                <tr class="hover:bg-stone-50/80 transition border-b border-stone-100">
+                    <td class="py-4 px-4 font-semibold text-stone-900">${item.project_title || item.title || ('Project #' + item.project_id)}</td>
+                    <td class="py-4 px-4 font-bold text-emerald-700">৳${Number(item.amount || 0).toLocaleString()}</td>
+                    <td class="py-4 px-4">${escrowBadge}</td>
+                    <td class="py-4 px-4 font-medium text-stone-800">${item.expected_roi ? item.expected_roi + '%' : '0%'}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error("Error loading portfolio:", error);
+    }
+}
+// --- 3. WALLET DETAILS ---
+async function loadInvestorWallet(userId) {
+    const walletBalanceElements = document.querySelectorAll(".live-wallet-balance");
+    const trxTableBody = document.querySelector("#transaction-table-body");
+
+    try {
+        const response = await fetch(`api/finance/get_wallet_details.php?user_id=${userId}`);
+        const result = await response.json();
+
+        if (result.status === 200) {
+            const formattedBalance = `৳${Number(result.balance || 0).toLocaleString()}`;
+            walletBalanceElements.forEach(el => el.textContent = formattedBalance);
+
+            if (trxTableBody) {
+                const transactions = result.transactions || [];
+
+                if (transactions.length === 0) {
+                    trxTableBody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-stone-400 font-medium">No transactions recorded yet.</td></tr>`;
+                    return;
+                }
+
+                trxTableBody.innerHTML = transactions.map(trx => {
+                    const type = (trx.type || '').toLowerCase();
+                    const isCredit = ['deposit', 'profit', 'profit_payout', 'refund'].includes(type);
+                    
+                    const typeBadge = isCredit 
+                        ? `<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 uppercase tracking-wide">${trx.type}</span>`
+                        : `<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-100 text-amber-800 uppercase tracking-wide">${trx.type}</span>`;
+
+                    const amountText = isCredit 
+                        ? `<span class="font-bold text-emerald-700">+৳${Number(trx.amount || 0).toLocaleString()}</span>`
+                        : `<span class="font-bold text-rose-600">-৳${Number(trx.amount || 0).toLocaleString()}</span>`;
+
+                    const dateStr = trx.created_at ? new Date(trx.created_at).toLocaleDateString() : 'N/A';
+
+                    return `
+                        <tr class="hover:bg-stone-50/80 transition border-b border-stone-100">
+                            <td class="py-4 px-4 text-xs font-bold text-stone-500">#TRX-${trx.transaction_id}</td>
+                            <td class="py-4 px-4">${typeBadge}</td>
+                            <td class="py-4 px-4">${amountText}</td>
+                            <td class="py-4 px-4 text-sm text-stone-600">${trx.reference || 'N/A'}</td>
+                            <td class="py-4 px-4 text-xs text-stone-400 text-right">${dateStr}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+    } catch (error) {
+        console.error("Error loading wallet details:", error);
+    }
+}
+
+// --- 4. NOTIFICATIONS ---
+async function loadNotifications(userId) {
+    const notifBadge = document.getElementById('notif-badge');
+    const notifList = document.getElementById('notif-list');
+
+    try {
+        const res = await fetch(`api/notifications/get_notifications.php?user_id=${userId}`);
+        const data = await res.json();
+
+        if (data.status === 200) {
+            const unreadCount = data.unread_count || 0;
+            if (notifBadge) {
+                if (unreadCount > 0) {
+                    notifBadge.innerText = unreadCount;
+                    notifBadge.classList.remove('hidden');
+                } else {
+                    notifBadge.classList.add('hidden');
+                }
+            }
+
+            if (notifList) {
+                const notifications = data.notifications || [];
+
+                if (notifications.length === 0) {
+                    notifList.innerHTML = `<div class="p-6 text-center text-xs text-stone-400 font-medium">No notifications yet.</div>`;
+                    return;
+                }
+
+                notifList.innerHTML = notifications.map(n => {
+                    const isUnread = n.is_read == 0;
+                    const bgStyle = isUnread ? 'bg-emerald-50/40 font-semibold' : 'bg-white';
+                    const dotStyle = isUnread ? `<span class="w-2 h-2 rounded-full bg-emerald-600 flex-shrink-0 mt-1.5"></span>` : `<span class="w-2 h-2 rounded-full bg-transparent flex-shrink-0 mt-1.5"></span>`;
+                    const dateStr = n.created_at ? new Date(n.created_at).toLocaleDateString() : '';
+
+                    return `
+                        <div onclick="markSingleAsRead(${n.notification_id})" class="p-3.5 hover:bg-stone-50 cursor-pointer transition flex items-start gap-3 ${bgStyle}">
+                            ${dotStyle}
+                            <div class="flex-1">
+                                <p class="text-xs text-stone-800 leading-snug">${n.message}</p>
+                                <span class="text-[10px] text-stone-400 mt-1 block">${dateStr}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+    } catch (err) {
+        console.error("Error fetching notifications:", err);
+    }
+}
+
+function toggleNotificationDropdown() {
+    const dropdown = document.getElementById('notif-dropdown');
+    if (dropdown) dropdown.classList.toggle('hidden');
+}
+
+async function markSingleAsRead(notificationId) {
+    const currentInvestorId = loggedInInvestor ? (loggedInInvestor.user_id || loggedInInvestor.id) : 3;
+    const formData = new FormData();
+    formData.append('notification_id', notificationId);
+    formData.append('user_id', currentInvestorId);
+
+    await fetch('api/notifications/mark_as_read.php', { method: 'POST', body: formData });
+    loadNotifications(currentInvestorId);
+}
+
+async function markAllNotificationsAsRead() {
+    const currentInvestorId = loggedInInvestor ? (loggedInInvestor.user_id || loggedInInvestor.id) : 3;
+    const formData = new FormData();
+    formData.append('notification_id', 0);
+    formData.append('user_id', currentInvestorId);
+
+    await fetch('api/notifications/mark_as_read.php', { method: 'POST', body: formData });
+    loadNotifications(currentInvestorId);
+}
+
+// --- 5. MODAL & INVESTMENT ACTION ---
+function openInvestModal(projectId, projectTitle) {
+    const modalProjId = document.getElementById('modalProjectId');
+    const modalProjTitle = document.getElementById('modalProjectTitle');
+    const modal = document.getElementById('investModal');
+
+    if (modalProjId) modalProjId.value = projectId;
+    if (modalProjTitle) modalProjTitle.innerText = 'Project: ' + projectTitle;
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeInvestModal() {
+    const modal = document.getElementById('investModal');
+    const form = document.getElementById('investForm');
+    if (modal) modal.classList.add('hidden');
+    if (form) form.reset();
+}
+
+async function handleSendInvestment(e) {
+    e.preventDefault();
+    const currentInvestorId = loggedInInvestor ? (loggedInInvestor.user_id || loggedInInvestor.id) : 3;
+
+    const projectId = document.getElementById('modalProjectId')?.value;
+    const amount = document.getElementById('investAmount')?.value;
+    const equity = document.getElementById('investEquity')?.value || 0;
+
+    const formData = new FormData();
+    formData.append('project_id', projectId);
+    formData.append('investor_id', currentInvestorId);
+    formData.append('amount', amount);
+    formData.append('equity_percentage', equity);
+
+    try {
+        const response = await fetch('api/investments/create.php', {
+            method: 'POST',
+            body: formData
+        });
+        const res = await response.json();
+
+        if (res && (res.status === 200 || res.status === 201)) {
+            if (typeof App !== 'undefined' && App.toast) {
+                App.toast(res.message || 'Investment successful!', 'success');
+            } else {
+                alert(res.message || 'Investment successful!');
+            }
+            closeInvestModal();
+            // Refresh lists dynamically
+            loadMyCommitments(currentInvestorId);
+            loadInvestorPortfolio(currentInvestorId);
+            loadInvestorWallet(currentInvestorId);
+            loadExploreProjects(currentInvestorId);
+        } else {
+            const errorMsg = res ? res.message : 'Error submitting proposal';
+            if (typeof App !== 'undefined' && App.toast) {
+                App.toast(errorMsg, 'error');
+            } else {
+                alert(errorMsg);
+            }
+        }
+    } catch (err) {
+        console.error("Error handling investment submission:", err);
+    }
+}
+</script>
+</body>
+</html>

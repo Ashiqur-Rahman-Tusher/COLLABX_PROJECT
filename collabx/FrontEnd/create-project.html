@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Project | CollabX</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  
+  <!-- Custom Fonts & Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-require-role="idea_owner,admin" class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-emerald-800 transition duration-300">
+          C
+        </div>
+        <span class="font-serif text-2xl font-bold tracking-tight text-stone-900">CollabX</span>
+      </a>
+
+      <div class="flex items-center gap-6">
+        <a id="backToDashboardBtn" href="#" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition duration-300">← Back to Dashboard</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Create Project Form Section -->
+  <main class="flex-grow flex items-center justify-center py-12 px-6">
+    <div class="w-full max-w-3xl bg-white rounded-3xl border border-stone-200 p-8 sm:p-10 shadow-sm">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-serif font-bold text-stone-900 mb-2">Create New Project</h1>
+        <p class="text-sm text-stone-600">Publish your startup idea to raise funds and recruit skilled talent.</p>
+      </div>
+
+      <form id="createProjectForm" class="space-y-6">
+        <!-- Project Title -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Project Title *</label>
+          <input type="text" name="title" required placeholder="e.g. Smart Irrigation System BD" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+        </div>
+
+        <!-- Category & Budget -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Industry / Category *</label>
+            <select name="category" required class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+              <option value="">Select Category</option>
+              <option value="AgriTech">AgriTech</option>
+              <option value="FinTech">FinTech</option>
+              <option value="HealthTech">HealthTech</option>
+              <option value="EdTech">EdTech</option>
+              <option value="SaaS">SaaS</option>
+              <option value="E-commerce">E-commerce</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Funding Goal (৳) *</label>
+            <input type="number" name="target_amount" required placeholder="e.g. 500000" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+          </div>
+        </div>
+
+        <!-- Short Pitch -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Short Summary / Pitch</label>
+          <input type="text" name="tagline" placeholder="A single-sentence catchy tagline for your startup" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+        </div>
+
+        <!-- Detailed Description -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Full Project Plan & Problem Statement *</label>
+          <textarea name="description" rows="4" required placeholder="Explain the core problem, target audience, and business model..." class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition"></textarea>
+        </div>
+
+        <!-- Required Manpower Roles Section -->
+        <div class="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-800 border-b border-stone-200 pb-2">Required Team / Manpower Roles</h3>
+          <p class="text-xs text-stone-500">Select the skills required for this project and the number of team members needed.</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 bg-white rounded-xl border border-stone-200 flex items-center justify-between">
+              <label class="flex items-center gap-2 cursor-pointer font-medium">
+                <input type="checkbox" class="accent-emerald-700" checked> Full-Stack Web Dev
+              </label>
+              <input type="number" value="1" min="1" class="w-12 px-2 py-1 bg-stone-50 border border-stone-200 rounded text-center">
+            </div>
+
+            <div class="p-3 bg-white rounded-xl border border-stone-200 flex items-center justify-between">
+              <label class="flex items-center gap-2 cursor-pointer font-medium">
+                <input type="checkbox" class="accent-emerald-700" checked> UI/UX Designer
+              </label>
+              <input type="number" value="1" min="1" class="w-12 px-2 py-1 bg-stone-50 border border-stone-200 rounded text-center">
+            </div>
+
+            <div class="p-3 bg-white rounded-xl border border-stone-200 flex items-center justify-between">
+              <label class="flex items-center gap-2 cursor-pointer font-medium">
+                <input type="checkbox" class="accent-emerald-700"> Mobile App Dev
+              </label>
+              <input type="number" value="1" min="1" class="w-12 px-2 py-1 bg-stone-50 border border-stone-200 rounded text-center">
+            </div>
+
+            <div class="p-3 bg-white rounded-xl border border-stone-200 flex items-center justify-between">
+              <label class="flex items-center gap-2 cursor-pointer font-medium">
+                <input type="checkbox" class="accent-emerald-700"> Digital Marketer
+              </label>
+              <input type="number" value="1" min="1" class="w-12 px-2 py-1 bg-stone-50 border border-stone-200 rounded text-center">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-3.5 rounded-xl shadow-sm transition duration-300">
+          Publish Project
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Guard check for Idea Owner and Admin
+    if (typeof App !== 'undefined' && App.guard) {
+        await App.guard(['idea_owner', 'admin']);
+    }
+
+    // 2. Dynamic Back to Dashboard button logic
+    const backBtn = document.getElementById('backToDashboardBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            // A) Came from Admin Panel
+            if (document.referrer && document.referrer.includes('admin')) {
+                window.location.href = 'admin-dashboard.html';
+                return;
+            }
+
+            // B) Check logged in session role
+            try {
+                const res = await fetch('api/auth/check_auth.php').then(r => r.json());
+                if (res && res.user) {
+                    const role = res.user.role || '';
+                    const isAdmin = res.user.is_admin || res.user.is_super_admin;
+
+                    if (isAdmin || role === 'admin' || role === 'super_admin') {
+                        window.location.href = 'admin-dashboard.html';
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error("Auth check failed:", err);
+            }
+
+            // C) Fallback for Idea Owner
+            window.location.href = 'ideaowner-dashboard.html';
+        });
+    }
+
+    // 3. Form submission logic
+    const form = document.getElementById('createProjectForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            if (typeof App !== 'undefined' && App.setBusy) {
+                App.setBusy(submitBtn, true, 'Submitting Project...');
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Submitting Project...';
+            }
+
+            try {
+                const res = await fetch('api/projects/create.php', {
+                    method: 'POST',
+                    body: formData
+                }).then(r => r.json());
+
+                if (typeof App !== 'undefined' && App.setBusy) {
+                    App.setBusy(submitBtn, false);
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Publish Project';
+                }
+
+                if (res && res.status === 200) {
+                    if (typeof App !== 'undefined' && App.toast) {
+                        App.toast(res.message, 'success');
+                    } else {
+                        alert(res.message || 'Project created successfully!');
+                    }
+
+                    // Check role for post-submit redirect
+                    try {
+                        const authRes = await fetch('api/auth/check_auth.php').then(r => r.json());
+                        if (authRes && authRes.user && (authRes.user.is_admin || authRes.user.role === 'admin')) {
+                            setTimeout(() => window.location.href = 'admin-dashboard.html', 1500);
+                            return;
+                        }
+                    } catch (authErr) {}
+
+                    setTimeout(() => window.location.href = 'ideaowner-dashboard.html', 1500);
+                } else {
+                    if (typeof App !== 'undefined' && App.toast) {
+                        App.toast(res ? res.message : 'Submission failed', 'error');
+                    } else {
+                        alert(res ? res.message : 'Submission failed.');
+                    }
+                }
+            } catch (err) {
+                if (typeof App !== 'undefined' && App.setBusy) {
+                    App.setBusy(submitBtn, false);
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Publish Project';
+                }
+                alert('Server error or network failure.');
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>

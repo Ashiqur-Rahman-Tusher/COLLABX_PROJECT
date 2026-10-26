@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invite Investor | CollabX</title>
+  
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="./tailwind-config.js"></script>
+  
+  <!-- Custom Fonts & Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-require-role="idea_owner" class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-emerald-800 transition duration-300">
+          C
+        </div>
+        <span class="font-serif text-2xl font-bold tracking-tight text-stone-900">CollabX</span>
+      </a>
+
+      <div class="flex items-center gap-6">
+        <a href="ideaowner-dashboard.html" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition duration-300">Back to Dashboard</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="flex-grow flex items-center justify-center py-12 px-6">
+    <div class="w-full max-w-xl bg-white rounded-3xl border border-stone-200 p-8 sm:p-10 shadow-sm">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-serif font-bold text-stone-900 mb-2">Send Investment Pitch</h1>
+        <p class="text-sm text-stone-600">Directly invite an accredited investor to review and fund your project proposal.</p>
+      </div>
+
+      <!-- Target Investor Info Card -->
+      <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 mb-6 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider bg-emerald-100 px-2 py-0.5 rounded">Selected Investor</span>
+          <h3 class="text-base font-bold text-stone-900 mt-1">Tanvir Hossain</h3>
+          <p class="text-xs text-stone-500">Investment Capacity: <b class="text-stone-800">৳1,500,000</b></p>
+        </div>
+        <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">★ 4.9 Rating</span>
+      </div>
+
+      <form id="inviteForm" class="space-y-5">
+        <!-- Select Project -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Select Your Project *</label>
+          <select required class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+            <option value="1">AgriTech Supply Hub (Target: ৳500,000)</option>
+            <option value="2">EcoPack BD (Target: ৳300,000)</option>
+          </select>
+        </div>
+
+        <!-- Expected Funding Amount Request -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Requested Investment Amount (৳) *</label>
+          <input type="number" required placeholder="e.g. 250000" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+        </div>
+
+        <!-- Personal Note / Pitch Message -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Personal Note / Pitch Summary *</label>
+          <textarea rows="4" required placeholder="Write a brief custom message highlighting why they should invest in this project..." class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-3.5 rounded-xl shadow-sm transition duration-300">
+          Send Invitation Proposal
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+  <script>
+    document.getElementById('inviteForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Invitation Proposal Sent to Investor!');
+      window.location.href = 'ideaowner-dashboard.html';
+    });
+  </script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

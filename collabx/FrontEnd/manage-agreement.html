@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legal Agreement & Digital Signing | CollabX</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-stone-50 text-stone-900 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm">C</div>
+        <span class="font-serif text-2xl font-bold text-stone-900">CollabX</span>
+      </a>
+      <a id="btnBackToNegotiation" href="negotiations.html" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition">Back to Negotiation</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+
+    <div class="border-b border-stone-200 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-serif font-bold text-stone-900">Partnership Agreement</h1>
+        <p class="text-sm text-stone-600">Review terms, verify participant details, and execute digital signatures.</p>
+      </div>
+      <span id="agreementStatusBadge" class="text-xs font-bold bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 w-fit">Loading...</span>
+    </div>
+
+    <!-- Contract Paper View -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-8 sm:p-12 shadow-sm space-y-8">
+      
+      <div class="flex justify-between items-start border-b border-stone-100 pb-6">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-stone-400">Contract Reference</span>
+          <h2 id="contractRefId" class="text-xl font-mono font-bold text-stone-800">CX-AGR-LOADING</h2>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold uppercase tracking-wider text-stone-400">Project</span>
+          <h3 id="projectTitle" class="text-base font-bold text-stone-900">Loading...</h3>
+        </div>
+      </div>
+
+      <!-- Dynamic Contract Terms -->
+      <div class="space-y-4 text-sm text-stone-700 leading-relaxed">
+        <h3 class="font-bold uppercase tracking-wider text-xs text-stone-500 border-b border-stone-100 pb-2">Agreed Terms & Stakeholders</h3>
+        <div id="partiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <p class="text-stone-400 text-center py-4">Fetching agreement details from database...</p>
+        </div>
+      </div>
+
+      <!-- Digital Signature Action -->
+      <div class="pt-6 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p class="text-xs text-stone-500">By clicking "Sign Agreement Digital Contract", you legally consent to the terms above.</p>
+        </div>
+        <button id="btnSign" onclick="signAgreement()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs px-6 py-3 rounded-xl shadow-sm transition w-full sm:w-auto">
+          Sign Agreement Digital Contract ✍️
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('project_id') || 1;
+    const currentUser = JSON.parse(localStorage.getItem('user')) || { user_id: 1, role: 'investor' };
+    let currentAgreementId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('btnBackToNegotiation').href = `negotiations.html?project_id=${projectId}`;
+        autoGenerateOrLoad();
+    });
+
+    // Custom Toast Notification System
+    function showToast(message, type = 'success', redirectUrl = null) {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'fixed top-5 right-5 z-50 flex flex-col gap-2';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        const isSuccess = type === 'success';
+        
+        toast.className = `px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border text-sm font-semibold transition-all duration-300 transform -translate-y-2 opacity-0 ${
+            isSuccess 
+            ? 'bg-stone-900 text-white border-stone-700' 
+            : 'bg-rose-900 text-white border-rose-700'
+        }`;
+
+        toast.innerHTML = `
+            <span class="text-lg">${isSuccess ? '✅' : '⚠️'}</span>
+            <span class="text-stone-100">${message}</span>
+        `;
+
+        container.appendChild(toast);
+
+        // Entry Animation
+        setTimeout(() => {
+            toast.classList.remove('-translate-y-2', 'opacity-0');
+        }, 50);
+
+        // Handle Redirect or Removal
+        if (redirectUrl) {
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 1500);
+        } else {
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    }
+
+    // Auto-generate agreement if not generated, then load data
+    function autoGenerateOrLoad() {
+        const formData = new FormData();
+        formData.append('project_id', projectId);
+
+        fetch('api/agreements/manage_agreement.php?action=generate', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(() => {
+            loadAgreementDetails();
+        })
+        .catch(err => {
+            console.error("Error auto generating agreement:", err);
+            loadAgreementDetails();
+        });
+    }
+
+    // Dynamic Data Loading
+    function loadAgreementDetails() {
+        fetch(`api/agreements/manage_agreement.php?action=details&project_id=${projectId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 200) {
+                    const agr = data.agreement;
+                    currentAgreementId = agr.agreement_id;
+                    document.getElementById('contractRefId').innerText = agr.contract_ref_id;
+                    document.getElementById('projectTitle').innerText = agr.project_title;
+
+                    // Update Status Badge
+                    const badge = document.getElementById('agreementStatusBadge');
+                    badge.innerText = agr.status.replace('_', ' ').toUpperCase();
+                    if (agr.status === 'active') {
+                        badge.className = "text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-xl border border-emerald-200 w-fit";
+                    }
+
+                    renderParties(data.parties);
+                } else {
+                    document.getElementById('partiesList').innerHTML = `<p class="text-stone-500 text-center py-4">${data.message}</p>`;
+                }
+            })
+            .catch(err => console.error("Error loading agreement details:", err));
+    }
+
+    function renderParties(parties) {
+        const container = document.getElementById('partiesList');
+        let html = '';
+        let currentUserSigned = false;
+
+        parties.forEach(p => {
+            if (p.user_id == currentUser.user_id && p.is_signed == 1) {
+                currentUserSigned = true;
+            }
+
+            html += `
+                <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-stone-900">${p.user_name}</span>
+                        <span class="text-xs px-2 py-0.5 rounded font-semibold ${p.is_signed == 1 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                            ${p.is_signed == 1 ? 'SIGNED ✓' : 'PENDING SIGNATURE'}
+                        </span>
+                    </div>
+                    <p class="text-xs text-stone-500">Role: <span class="uppercase font-semibold">${p.role}</span></p>
+                    <p class="text-xs text-stone-700 pt-1">
+                        Salary: <b>৳${parseFloat(p.monthly_salary).toLocaleString()}</b> | Profit Share: <b>${p.profit_share_percent}%</b>
+                    </p>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+
+        // Button state update based on dynamic user signature
+        const btnSign = document.getElementById('btnSign');
+        if (currentUserSigned) {
+            btnSign.innerText = "You Have Already Signed ✓";
+            btnSign.disabled = true;
+            btnSign.className = "bg-stone-300 text-stone-600 font-semibold text-xs px-6 py-3 rounded-xl cursor-not-allowed w-full sm:w-auto";
+        }
+    }
+
+    // Dynamic Digital Signature Action with Toast & Auto-Redirect
+    function signAgreement() {
+        if (!currentAgreementId) {
+            showToast("Agreement ID not found!", "error");
+            return;
+        }
+
+        const btnSign = document.getElementById('btnSign');
+        btnSign.disabled = true;
+        btnSign.innerText = "Signing Agreement...";
+
+        const formData = new FormData();
+        formData.append('agreement_id', currentAgreementId);
+        formData.append('user_id', currentUser.user_id);
+
+        fetch('api/agreements/manage_agreement.php?action=sign', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 200 || data.success) {
+                // Toast দেখাবে এবং ১.৫ সেকেন্ড পর Dashboard-এ রিডাইরেক্ট হবে
+                showToast("Agreement signed successfully! Redirecting...", "success", "investor-dashboard.html");
+            } else {
+                showToast(data.message || "Failed to sign agreement.", "error");
+                btnSign.disabled = false;
+                btnSign.innerText = "Sign Agreement Digital Contract ✍️";
+            }
+        })
+        .catch(err => {
+            console.error("Error signing agreement:", err);
+            showToast("Network or server error occurred.", "error");
+            btnSign.disabled = false;
+            btnSign.innerText = "Sign Agreement Digital Contract ✍️";
+        });
+    }
+  </script>
+</body>
+</html>

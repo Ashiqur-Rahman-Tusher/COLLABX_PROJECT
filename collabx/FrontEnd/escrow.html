@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escrow Vault Security | CollabX</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm">C</div>
+        <span class="font-serif text-2xl font-bold text-stone-900">CollabX</span>
+      </a>
+      <a id="backToDashboardBtn" href="#" class="text-sm font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-4 py-2 rounded-xl transition">← Back to Dashboard</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+
+    <div class="border-b border-stone-200 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-serif font-bold text-stone-900">Escrow Vault Overview</h1>
+        <p class="text-sm text-stone-600">Bank-grade multi-signature vault protecting investor funds & worker milestone payments.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="salary-release.html" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs px-5 py-3 rounded-xl shadow-sm transition flex items-center gap-2">
+            <span>💸 Release Salary</span>
+        </a>
+        <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-3.5 py-3 rounded-xl border border-emerald-200">🔒 100% Protected</span>
+      </div>
+    </div>
+
+    <!-- Escrow Card Details -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="p-6 rounded-3xl bg-white border border-stone-200 shadow-sm">
+        <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Locked In Escrow</span>
+        <p id="lockedAmount" class="text-3xl font-serif font-bold text-emerald-700 mt-2">৳0</p>
+        <p id="projectName" class="text-[11px] text-stone-500 mt-1">Project: Loading...</p>
+      </div>
+
+      <div class="p-6 rounded-3xl bg-white border border-stone-200 shadow-sm">
+        <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Released To Date</span>
+        <p id="releasedAmount" class="text-3xl font-serif font-bold text-stone-900 mt-2">৳0</p>
+        <p class="text-[11px] text-stone-500 mt-1">Completed Milestones</p>
+      </div>
+
+      <div class="p-6 rounded-3xl bg-white border border-stone-200 shadow-sm">
+        <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Pending Release Request</span>
+        <p id="pendingAmount" class="text-3xl font-serif font-bold text-amber-600 mt-2">৳0</p>
+        <p class="text-[11px] text-stone-500 mt-1">Under Approval Review</p>
+      </div>
+    </div>
+
+    <!-- Recent Escrow Activity Table -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-4">
+        <h3 class="text-lg font-serif font-bold text-stone-900">Recent Escrow Transactions</h3>
+        <span class="text-xs text-stone-500">Live Log</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stone-200 text-xs font-bold uppercase tracking-wider text-stone-500">
+              <th class="py-3 px-4">Transaction Details</th>
+              <th class="py-3 px-4">Type</th>
+              <th class="py-3 px-4">Amount</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="txTableBody" class="divide-y divide-stone-100 text-sm">
+            <tr>
+              <td colspan="5" class="py-6 text-center text-xs text-stone-400">Loading escrow records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Escrow Technology. All rights reserved.
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Dynamic Back to Dashboard Handler
+    const backBtn = document.getElementById('backToDashboardBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            // A) If user came directly from another dashboard page, send them back there
+            if (document.referrer && document.referrer.includes('dashboard')) {
+                window.location.href = document.referrer;
+                return;
+            }
+
+            // B) Otherwise check active PHP session from backend
+            try {
+                const authRes = await fetch('api/auth/check_auth.php').then(r => r.json());
+                if (authRes && authRes.user) {
+                    const role = authRes.user.role || '';
+                    const isAdmin = authRes.user.is_admin || authRes.user.is_super_admin;
+
+                    if (isAdmin || role === 'admin' || role === 'super_admin') {
+                        window.location.href = 'admin-dashboard.html';
+                        return;
+                    } else if (role === 'investor') {
+                        window.location.href = 'investor-dashboard.html';
+                        return;
+                    } else if (role === 'manpower' || role === 'worker') {
+                        window.location.href = 'manpower-dashboard.html';
+                        return;
+                    } else if (role === 'idea_owner' || role === 'ideaowner') {
+                        window.location.href = 'ideaowner-dashboard.html';
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error("Auth check error:", err);
+            }
+
+            // C) Fallback: Go back in history or index
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+    }
+
+    fetchEscrowVaultData();
+});
+  async function fetchEscrowVaultData() {
+      try {
+          const res = await fetch('api/wallet/escrow.php').then(r => r.json());
+          if (res.status === 200 && res.escrow) {
+              document.getElementById('lockedAmount').innerText = '৳' + Number(res.escrow.locked_amount).toLocaleString();
+              document.getElementById('releasedAmount').innerText = '৳' + Number(res.escrow.released_amount).toLocaleString();
+              document.getElementById('pendingAmount').innerText = '৳' + Number(res.escrow.pending_amount).toLocaleString();
+              document.getElementById('projectName').innerText = 'Project: ' + (res.escrow.project_title || 'Active Venture');
+
+              renderTransactions(res.transactions || []);
+          } else {
+              document.getElementById('projectName').innerText = 'No active project found';
+              renderEmptyTransactions();
+          }
+      } catch (err) {
+          console.error("Failed to load escrow data:", err);
+          renderEmptyTransactions();
+      }
+  }
+
+function renderTransactions(list) {
+    const tbody = document.getElementById('txTableBody');
+    if (!tbody) return;
+
+    if (list.length === 0) {
+        renderEmptyTransactions();
+        return;
+    }
+
+    tbody.innerHTML = list.map(tx => `
+        <tr class="hover:bg-stone-50/80 transition">
+          <td class="py-4 px-4 font-semibold text-stone-900">
+            ${tx.title}
+            <p class="text-xs text-stone-400 font-normal">Project: ${tx.project}</p>
+          </td>
+          <td class="py-4 px-4">
+            <span class="text-xs bg-blue-50 text-blue-700 font-bold px-2.5 py-1 rounded-lg">${tx.type}</span>
+          </td>
+          <td class="py-4 px-4 font-bold text-emerald-700">+৳${Number(tx.amount).toLocaleString()}</td>
+          <td class="py-4 px-4">
+            <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">${tx.status}</span>
+          </td>
+          <td class="py-4 px-4 text-right">
+            <a href="salary-release.html?project_id=${tx.project_id || ''}" class="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-3.5 py-2 rounded-lg transition">Disburse Salary →</a>
+          </td>
+        </tr>
+    `).join('');
+}
+
+  function renderEmptyTransactions() {
+      const tbody = document.getElementById('txTableBody');
+      if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-xs text-stone-400">No escrow transactions found.</td></tr>`;
+      }
+  }
+  </script>
+</body>
+</html>

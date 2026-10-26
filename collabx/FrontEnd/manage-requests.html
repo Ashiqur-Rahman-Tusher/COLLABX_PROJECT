@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Received Requests | CollabX</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  
+  <!-- Custom Fonts & Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-require-role="idea_owner" class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Top Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="ideaowner-dashboard.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-emerald-800 transition duration-300">
+          C
+        </div>
+        <span class="font-serif text-2xl font-bold tracking-tight text-stone-900">CollabX</span>
+      </a>
+
+      <a href="ideaowner-dashboard.html" class="text-sm font-semibold text-stone-600 hover:text-stone-900 flex items-center gap-2 transition">
+        ← Back to Dashboard
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="max-w-7xl mx-auto px-6 py-10 flex-grow w-full space-y-10">
+
+    <!-- Page Title -->
+    <div>
+      <h1 class="text-3xl font-serif font-bold text-stone-900">Manage Received Requests</h1>
+      <p class="text-sm text-stone-600 mt-1">Review incoming requests from talent applicants and investor funding offers for <span id="projectTitleDisplay" class="font-bold text-emerald-800">Project</span>.</p>
+    </div>
+
+    <!-- Section 1: Talent Join Requests -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-4">
+        <div>
+          <h2 class="text-xl font-serif font-bold text-stone-900">Talent Join Requests</h2>
+          <p class="text-xs text-stone-500">Skilled candidates applying to join your project team.</p>
+        </div>
+        <span id="talentCountBadge" class="px-3 py-1 text-xs font-bold bg-amber-100 text-amber-800 rounded-full">0 Pending</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stone-200 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+              <th class="py-3 px-4">Applicant</th>
+              <th class="py-3 px-4">Role & Match</th>
+              <th class="py-3 px-4">Expected Compensation</th>
+              <th class="py-3 px-4">Portfolio</th>
+              <th class="py-3 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="talentRequestsTableBody" class="divide-y divide-stone-100 text-sm">
+            <tr>
+              <td colspan="5" class="py-8 text-center text-stone-400">Loading talent join requests...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 2: Investor Funding Commitments -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm space-y-6">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-4">
+        <div>
+          <h2 class="text-xl font-serif font-bold text-stone-900">Investor Funding Commitments</h2>
+          <p class="text-xs text-stone-500">Capital funding commitments waiting for your contract confirmation.</p>
+        </div>
+        <span id="investorCountBadge" class="px-3 py-1 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-full">0 Offers Active</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stone-200 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+              <th class="py-3 px-4">Investor</th>
+              <th class="py-3 px-4">Committed Amount</th>
+              <th class="py-3 px-4">Escrow Deposit Status</th>
+              <th class="py-3 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="investorCommitmentsTableBody" class="divide-y divide-stone-100 text-sm">
+            <tr>
+              <td colspan="4" class="py-8 text-center text-stone-400">Loading funding offers...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Custom Counter Offer Modal (Modern Popup) -->
+  <div id="negotiationModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-stone-200 transform transition-all space-y-6">
+      <div>
+        <h3 class="text-xl font-serif font-bold text-stone-900">Send Counter Offer</h3>
+        <p class="text-xs text-stone-500 mt-1">Submit your revised investment terms for this proposal.</p>
+      </div>
+
+      <form id="counterOfferForm" onsubmit="handleCounterOfferSubmit(event)" class="space-y-4">
+        <input type="hidden" id="modalInvestorId">
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">Counter Offer Amount (BDT)</label>
+          <input type="number" id="modalAmount" required class="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-amber-600 focus:outline-none text-stone-900 text-sm font-semibold" placeholder="e.g. 50000">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">Profit / Equity Share (%)</label>
+          <input type="number" step="0.1" id="modalEquity" required class="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-amber-600 focus:outline-none text-stone-900 text-sm font-semibold" placeholder="e.g. 5">
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-100">
+          <button type="button" onclick="closeNegotiationModal()" class="px-5 py-2.5 text-xs font-bold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-xl transition">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition shadow-sm">
+            Submit Counter Offer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+<script src="assets/js/app.js"></script>
+<script>
+let currentProjectId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    currentProjectId = urlParams.get('project_id');
+
+    if (!currentProjectId) {
+        alert('No Project ID provided in the URL.');
+        window.location.href = 'ideaowner-dashboard.html';
+        return;
+    }
+
+    if (typeof App !== 'undefined' && App.guard) {
+        await App.guard(['idea_owner']);
+    }
+
+    loadProjectRequests(currentProjectId);
+});
+
+async function loadProjectRequests(projectId) {
+    try {
+        let response = await fetch(`api/ideaowner/get_requests.php?project_id=${projectId}`);
+        
+        if (!response.ok) {
+            response = await fetch(`api/requests/manage_requests.php?project_id=${projectId}`);
+        }
+
+        if (!response.ok) {
+            throw new Error(`Server returned status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data && data.status === 200) {
+            if (data.project_title) {
+                const titleElem = document.getElementById('projectTitleDisplay');
+                if (titleElem) titleElem.innerText = `"${data.project_title}"`;
+            }
+
+            const talentData = data.talent_requests || data.requests || data.data || [];
+            renderTalentRequests(talentData);
+            renderInvestorCommitments(data.investor_commitments || []);
+        } else {
+            renderEmptyTalentState();
+            renderEmptyInvestorState();
+        }
+    } catch (err) {
+        console.error("Error fetching project requests:", err);
+        renderEmptyTalentState();
+        renderEmptyInvestorState();
+    }
+}
+
+function renderTalentRequests(requests) {
+    const tbody = document.getElementById('talentRequestsTableBody');
+    const badge = document.getElementById('talentCountBadge');
+
+    if (!tbody) return;
+
+    const pendingList = requests.filter(r => r.status === 'pending' || !r.status);
+    if (badge) badge.innerText = `${pendingList.length} Pending`;
+
+    if (!requests || requests.length === 0) {
+        renderEmptyTalentState();
+        return;
+    }
+
+    tbody.innerHTML = requests.map(item => `
+        <tr class="hover:bg-stone-50 transition border-b border-stone-100">
+          <td class="py-4 px-4">
+            <p class="font-bold text-stone-900">${item.applicant_name || 'Applicant'}</p>
+            <p class="text-xs text-stone-500">Applied for: ${item.role_applied || 'Team Member'}</p>
+          </td>
+          <td class="py-4 px-4">
+            <span class="font-medium text-stone-800">${item.applicant_role || 'Talent'}</span>
+            ${item.match_score ? `<span class="ml-2 text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">${item.match_score}</span>` : ''}
+          </td>
+          <td class="py-4 px-4 font-bold text-stone-800">
+            ৳${Number(item.expected_salary || item.compensation || 0).toLocaleString()} / mo
+          </td>
+          <td class="py-4 px-4">
+            ${item.portfolio_link && item.portfolio_link !== 'N/A' ? `
+              <a href="${item.portfolio_link}" target="_blank" class="text-xs font-semibold text-emerald-700 hover:underline inline-flex items-center gap-1">
+                View Profile →
+              </a>
+            ` : `<span class="text-xs text-stone-400">N/A</span>`}
+          </td>
+          <td class="py-4 px-4 text-right space-x-2">
+            ${item.status === 'accepted' || item.status === 'approved' ? `
+              <span class="text-xs font-bold px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-lg">Accepted</span>
+            ` : item.status === 'declined' || item.status === 'rejected' ? `
+              <span class="text-xs font-bold px-3 py-1.5 bg-rose-100 text-rose-800 rounded-lg">Declined</span>
+            ` : `
+              <button onclick="handleRequestAction(${item.request_id || item.id}, 'accepted', 'talent')" class="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl transition">
+                Accept
+              </button>
+              <button onclick="handleRequestAction(${item.request_id || item.id}, 'declined', 'talent')" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold px-4 py-2 rounded-xl border border-rose-200 transition">
+                Decline
+              </button>
+            `}
+          </td>
+        </tr>
+    `).join('');
+}
+
+function renderEmptyTalentState() {
+    const tbody = document.getElementById('talentRequestsTableBody');
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+              <td colspan="5" class="py-10 text-center text-stone-500 font-medium">
+                No talent join requests found for this project yet.
+              </td>
+            </tr>
+        `;
+    }
+}
+
+function renderInvestorCommitments(commitments) {
+    const tbody = document.getElementById('investorCommitmentsTableBody');
+    const badge = document.getElementById('investorCountBadge');
+
+    if (!tbody) return;
+
+    if (badge) badge.innerText = `${commitments.length} Offers Active`;
+
+    if (!commitments || commitments.length === 0) {
+        renderEmptyInvestorState();
+        return;
+    }
+
+    tbody.innerHTML = commitments.map(item => `
+        <tr class="hover:bg-stone-50 transition border-b border-stone-100">
+          <td class="py-4 px-4">
+            <p class="font-bold text-stone-900">${item.investor_name || 'Investor'}</p>
+            <p class="text-xs text-stone-500">${item.investor_email || ''}</p>
+          </td>
+          <td class="py-4 px-4 font-bold text-emerald-700">
+            ৳${Number(item.committed_amount || item.amount || 0).toLocaleString()}
+          </td>
+          <td class="py-4 px-4">
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full uppercase ${
+                item.escrow_status === 'deposited' || item.escrow_status === 'escrowed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+            }">${item.escrow_status || 'Pending Deposit'}</span>
+          </td>
+          <td class="py-4 px-4 text-right space-x-2">
+            <button onclick="handleRequestAction(${item.commitment_id || item.id}, 'accepted', 'investor')" class="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl transition">
+              Accept Investment
+            </button>
+            <button onclick="openNegotiationModal(${item.user_id || item.investor_id || 0}, ${item.committed_amount || item.amount || 0}, ${item.proposed_percentage || 5}, currentProjectId)" class="text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl transition">
+    Counter Offer
+</button>
+          </td>
+        </tr>
+    `).join('');
+}
+
+function renderEmptyInvestorState() {
+    const tbody = document.getElementById('investorCommitmentsTableBody');
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+              <td colspan="4" class="py-10 text-center text-stone-500 font-medium">
+                No active funding commitments for this project yet.
+              </td>
+            </tr>
+        `;
+    }
+}
+
+async function handleRequestAction(requestId, status, type) {
+    if (!confirm(`Are you sure you want to set this request to ${status}?`)) return;
+
+    try {
+        const response = await fetch('api/requests/update_status.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                request_id: requestId,
+                status: status,
+                type: type,
+                project_id: currentProjectId
+            })
+        });
+
+        const result = await response.json();
+        if (result.status === 200) {
+            alert(result.message || `Request successfully ${status}!`);
+            if (result.redirect) {
+                window.location.href = result.redirect;
+            } else if (result.agreement_id) {
+                window.location.href = `manage-agreement.html?project_id=${currentProjectId}`;
+            } else {
+                location.reload();
+            }
+        } else {
+            alert('Error updating status: ' + (result.message || 'Operation failed.'));
+        }
+    } catch (err) {
+        alert('Server connection error.');
+    }
+}
+
+/* --- Custom Modal Functions --- */
+function openNegotiationModal(investorUserId, currentAmount, currentEquity) {
+    document.getElementById('modalInvestorId').value = investorUserId;
+    document.getElementById('modalAmount').value = currentAmount || '';
+    document.getElementById('modalEquity').value = currentEquity || 5;
+    document.getElementById('negotiationModal').classList.remove('hidden');
+}
+
+function closeNegotiationModal() {
+    document.getElementById('negotiationModal').classList.add('hidden');
+}
+
+async function handleCounterOfferSubmit(event) {
+    event.preventDefault();
+    const investorUserId = document.getElementById('modalInvestorId').value;
+    const newAmount = document.getElementById('modalAmount').value;
+    const newEquity = document.getElementById('modalEquity').value;
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'submit_proposal');
+        formData.append('project_id', currentProjectId);
+        formData.append('user_id', investorUserId);
+        formData.append('role', 'investor');
+        formData.append('proposed_salary', newAmount);
+        formData.append('proposed_percentage', newEquity);
+        formData.append('proposed_by', 'idea_owner');
+
+        const response = await fetch('api/agreements/negotiate.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.status === 200) {
+            alert("✅ " + result.message);
+            closeNegotiationModal();
+            location.reload();
+        } else {
+            alert("❌ Error: " + (result.message || "Failed to submit counter offer."));
+        }
+    } catch (error) {
+        console.error("Negotiation Error:", error);
+        alert("Server connection error during negotiation!");
+    }
+}
+</script>
+</body>
+</html>

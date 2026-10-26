@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agreement Contract Details | CollabX</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-stone-50 text-stone-900 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm">C</div>
+        <span class="font-serif text-2xl font-bold text-stone-900">CollabX</span>
+      </a>
+      <a id="btnBackToAgreement" href="manage-agreement.html" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition">Back to Agreement</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+
+    <div class="border-b border-stone-200 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-serif font-bold text-stone-900">Executed Agreement Document</h1>
+        <p class="text-sm text-stone-600">Official legal partnership record stored on CollabX platform.</p>
+      </div>
+      <button onclick="window.print()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs font-bold px-4 py-2.5 rounded-xl transition w-fit">
+        Print / Download PDF 📄
+      </button>
+    </div>
+
+    <!-- Legal Document Card -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-8 sm:p-12 shadow-sm space-y-8">
+      
+      <div class="flex justify-between items-start border-b border-stone-100 pb-6">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-stone-400">Reference ID</span>
+          <h2 id="docContractRef" class="text-xl font-mono font-bold text-stone-800">Loading...</h2>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold uppercase tracking-wider text-stone-400">Project Title</span>
+          <h3 id="docProjectTitle" class="text-base font-bold text-stone-900">Loading...</h3>
+        </div>
+      </div>
+
+      <!-- Agreement Overview Status -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-200 text-xs">
+        <div>
+          <span class="text-stone-400 block font-semibold">Contract Status</span>
+          <span id="docStatus" class="font-bold text-emerald-700 uppercase">Loading...</span>
+        </div>
+        <div>
+          <span class="text-stone-400 block font-semibold">Created Date</span>
+          <span id="docCreatedAt" class="font-bold text-stone-800">Loading...</span>
+        </div>
+        <div>
+          <span class="text-stone-400 block font-semibold">Finalized Date</span>
+          <span id="docFinalizedAt" class="font-bold text-stone-800">N/A</span>
+        </div>
+      </div>
+
+      <!-- Participating Stakeholders -->
+      <div class="space-y-4">
+        <h3 class="font-bold uppercase tracking-wider text-xs text-stone-500 border-b border-stone-100 pb-2">Contract Parties & Ownership Breakdown</h3>
+        <div id="docPartiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <p class="text-stone-400 text-center py-4">Fetching details...</p>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('project_id') || 1;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('btnBackToAgreement').href = `manage-agreement.html?project_id=${projectId}`;
+        fetchAgreementDetails();
+    });
+
+    function fetchAgreementDetails() {
+        fetch(`api/agreements/manage_agreement.php?action=details&project_id=${projectId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 200) {
+                    const agr = data.agreement;
+                    document.getElementById('docContractRef').innerText = agr.contract_ref_id;
+                    document.getElementById('docProjectTitle').innerText = agr.project_title;
+                    document.getElementById('docStatus').innerText = agr.status.replace('_', ' ');
+                    document.getElementById('docCreatedAt').innerText = new Date(agr.created_at).toLocaleDateString();
+                    document.getElementById('docFinalizedAt').innerText = agr.finalized_at ? new Date(agr.finalized_at).toLocaleDateString() : 'Pending Execution';
+
+                    renderParties(data.parties);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(err => console.error("Error loading details:", err));
+    }
+
+    function renderParties(parties) {
+        const container = document.getElementById('docPartiesList');
+        let html = '';
+
+        parties.forEach(p => {
+            html += `
+                <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-stone-900">${p.user_name}</span>
+                        <span class="text-xs px-2 py-0.5 rounded font-bold ${p.is_signed == 1 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                            ${p.is_signed == 1 ? 'SIGNED ✓' : 'PENDING'}
+                        </span>
+                    </div>
+                    <div class="text-xs text-stone-600 space-y-0.5">
+                        <p>Role: <b class="uppercase">${p.role}</b></p>
+                        <p>Email: <b>${p.email}</b></p>
+                        <p>Agreed Salary: <b>৳${parseFloat(p.monthly_salary).toLocaleString()}</b></p>
+                        <p>Profit Share: <b>${p.profit_share_percent}%</b></p>
+                        <p class="text-stone-400 pt-1">Signed Date: <b>${p.signed_at ? new Date(p.signed_at).toLocaleString() : 'N/A'}</b></p>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

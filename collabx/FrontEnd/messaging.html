@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Direct Messages | CollabX</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-stone-100 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-900 text-white border-b border-stone-800">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="dashboard.html" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-sm">C</div>
+        <span class="font-serif text-2xl font-bold text-white">CollabX</span>
+      </a>
+      <a href="dashboard.html" class="text-xs font-semibold text-stone-400 hover:text-white transition">← Back to Dashboard</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-6 py-8 flex-grow w-full">
+    <div class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-12 h-[75vh]">
+      
+      <!-- Left Sidebar: Conversations List -->
+      <div class="md:col-span-4 border-r border-stone-200 flex flex-col h-full bg-stone-50/50">
+        <div class="p-4 border-b border-stone-200 bg-white">
+          <h2 class="text-lg font-serif font-bold text-stone-900">Messages</h2>
+          <p class="text-xs text-stone-500">Direct team & stakeholder discussions</p>
+        </div>
+        
+        <!-- Contact List Container -->
+        <div id="contactsListContainer" class="flex-grow overflow-y-auto divide-y divide-stone-100">
+          <div class="p-6 text-center text-xs text-stone-400">Loading contacts...</div>
+        </div>
+      </div>
+
+      <!-- Right Area: Chat Window -->
+      <div class="md:col-span-8 flex flex-col h-full bg-white">
+        
+        <!-- Chat Header -->
+        <div id="chatHeader" class="p-4 border-b border-stone-200 flex items-center justify-between bg-stone-50/30">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-sm" id="activeUserAvatar">?</div>
+            <div>
+              <h3 class="font-bold text-sm text-stone-900" id="activeUserName">Select a conversation</h3>
+              <p class="text-xs text-stone-500" id="activeUserRole">Choose a user from the left list to start chatting</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message Box Scroll Container -->
+        <div id="messagesContainer" class="flex-grow p-6 overflow-y-auto space-y-4 bg-stone-50/20">
+          <div class="h-full flex items-center justify-center text-xs text-stone-400">
+            Please select a conversation to view messages.
+          </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="sendMessageForm" class="p-4 border-t border-stone-200 flex gap-3 bg-white">
+          <input type="hidden" id="receiverIdInput" value="">
+          <input type="text" id="messageInput" placeholder="Type your message..." required class="flex-grow bg-stone-100 text-stone-900 placeholder-stone-400 text-sm rounded-xl px-4 py-3 border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 transition">
+          <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-6 py-3 rounded-xl transition">Send</button>
+        </form>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-stone-200 border-t border-stone-300 py-4 text-center text-xs text-stone-600">
+    © 2026 CollabX Direct Messaging System.
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script>
+    let activeReceiverId = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof App !== 'undefined' && App.guard) {
+        await App.guard();
+      }
+      loadContacts();
+
+      // Check if user ID passed in URL like messaging.html?user_id=5
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetUserId = urlParams.get('user_id');
+      if (targetUserId) {
+        selectConversation(targetUserId, urlParams.get('name') || 'User', 'Member');
+      }
+    });
+
+    async function loadContacts() {
+      const container = document.getElementById('contactsListContainer');
+      try {
+        const res = await fetch('api/chat/messages.php?action=contacts').then(r => r.json());
+        if (res && res.status === 200 && Array.isArray(res.contacts)) {
+          if (res.contacts.length === 0) {
+            container.innerHTML = `<div class="p-6 text-center text-xs text-stone-400">No recent conversations.</div>`;
+            return;
+          }
+
+          container.innerHTML = res.contacts.map(c => `
+            <div onclick="selectConversation(${c.user_id}, '${c.name.replace(/'/g, "\\'")}', '${c.role || 'Member'}')" class="p-4 hover:bg-stone-100 cursor-pointer transition flex items-center justify-between border-b border-stone-100">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-stone-200 text-stone-800 font-bold flex items-center justify-center text-xs">
+                  ${c.name ? c.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div>
+                  <h4 class="font-bold text-xs text-stone-900">${c.name}</h4>
+                  <p class="text-[11px] text-stone-500 capitalize">${c.role || 'Member'}</p>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        container.innerHTML = `<div class="p-6 text-center text-xs text-rose-500">Failed to load contacts.</div>`;
+      }
+    }
+
+    function selectConversation(userId, name, role) {
+      activeReceiverId = userId;
+      document.getElementById('receiverIdInput').value = userId;
+      document.getElementById('activeUserName').innerText = name;
+      document.getElementById('activeUserRole').innerText = role;
+      document.getElementById('activeUserAvatar').innerText = name.charAt(0).toUpperCase();
+
+      fetchMessages(userId);
+    }
+
+    async function fetchMessages(userId) {
+      const container = document.getElementById('messagesContainer');
+      try {
+        const res = await fetch(`api/chat/messages.php?action=fetch&receiver_id=${userId}`).then(r => r.json());
+        if (res && res.status === 200 && Array.isArray(res.messages)) {
+          if (res.messages.length === 0) {
+            container.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-stone-400">No messages yet. Say hi!</div>`;
+            return;
+          }
+
+          const currentUserId = res.current_user_id;
+
+          container.innerHTML = res.messages.map(m => {
+            const isMe = Number(m.sender_id) === Number(currentUserId);
+            return `
+              <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[70%] ${isMe ? 'bg-emerald-700 text-white rounded-2xl rounded-tr-none' : 'bg-stone-200 text-stone-900 rounded-2xl rounded-tl-none'} px-4 py-2.5 text-xs shadow-sm">
+                  <p>${m.message}</p>
+                  <span class="text-[9px] ${isMe ? 'text-emerald-200' : 'text-stone-500'} block text-right mt-1">${m.created_at ? m.created_at.split(' ')[1].substring(0, 5) : ''}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          container.scrollTop = container.scrollHeight;
+        }
+      } catch (err) {
+        container.innerHTML = `<div class="p-4 text-center text-xs text-rose-500">Failed to load chat history.</div>`;
+      }
+    }
+
+    document.getElementById('sendMessageForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!activeReceiverId) {
+        if (typeof App !== 'undefined' && App.toast) App.toast('Please select a contact first!', 'error');
+        return;
+      }
+
+      const input = document.getElementById('messageInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const formData = new FormData();
+      formData.append('receiver_id', activeReceiverId);
+      formData.append('message', msg);
+
+      try {
+        const res = await fetch('api/chat/messages.php?action=send', { method: 'POST', body: formData }).then(r => r.json());
+        if (res && res.status === 200) {
+          input.value = '';
+          fetchMessages(activeReceiverId);
+        } else {
+          if (typeof App !== 'undefined' && App.toast) App.toast(res ? res.message : 'Message send failed', 'error');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>

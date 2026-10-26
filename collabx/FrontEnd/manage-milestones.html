@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Project Milestones | CollabX</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script> 
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-require-role="idea_owner" class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm">C</div>
+        <span class="font-serif text-2xl font-bold text-stone-900">CollabX</span>
+      </a>
+      <a href="ideaowner-dashboard.html" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition">Back to Dashboard</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-6">
+      <div>
+        <h1 class="text-3xl font-serif font-bold text-stone-900">Milestone Management</h1>
+        <p class="text-sm text-stone-600">Track task progress and request Escrow fund releases for completed deliverables.</p>
+      </div>
+      <button onclick="document.getElementById('addMilestoneModal').classList.remove('hidden')" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-3 rounded-xl transition shadow-sm">
+        + Create New Milestone
+      </button>
+    </div>
+
+    <!-- Active Milestones List Container -->
+    <div id="milestonesContainer" class="space-y-4">
+      <div class="text-center py-12 text-stone-500 text-sm">
+        Loading project milestones...
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Create Milestone Modal -->
+  <div id="addMilestoneModal" class="hidden fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full border border-stone-200 shadow-xl space-y-6">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-4">
+        <h3 class="text-lg font-bold font-serif text-stone-900">Create New Milestone</h3>
+        <button onclick="document.getElementById('addMilestoneModal').classList.add('hidden')" class="text-stone-400 hover:text-stone-700 font-bold text-xl">&times;</button>
+      </div>
+
+      <form id="createMilestoneForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">Title *</label>
+          <input type="text" name="title" required placeholder="e.g. Backend API Integration" class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700/20">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">Amount (৳) *</label>
+          <input type="number" name="amount" required min="100" placeholder="50000" class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700/20">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">Target Completion Date</label>
+          <input type="date" name="due_date" class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700/20">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">Description</label>
+          <textarea name="description" rows="3" placeholder="Milestone deliverable details..." class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700/20"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-100">
+          <button type="button" onclick="document.getElementById('addMilestoneModal').classList.add('hidden')" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-stone-100">Cancel</button>
+          <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-sm transition">Save Milestone</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script>
+  let urlParams = new URLSearchParams(window.location.search);
+  let currentProjectId = urlParams.get('project_id') || 1;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof App !== 'undefined' && App.guard) {
+          await App.guard(['idea_owner']);
+      }
+      
+      loadProjectMilestones(currentProjectId);
+
+      // Create Milestone Form Event
+      const createForm = document.getElementById('createMilestoneForm');
+      if (createForm) {
+          createForm.addEventListener('submit', async (e) => {
+              e.preventDefault();
+              
+              const formData = new FormData(createForm);
+              formData.append('action', 'create');
+              formData.append('project_id', currentProjectId);
+
+              try {
+                  const res = await fetch('api/projects/milestones.php', {
+                      method: 'POST',
+                      body: formData
+                  }).then(r => r.json());
+
+                  if (res.status === 200) {
+                      alert(res.message);
+                      document.getElementById('addMilestoneModal').classList.add('hidden');
+                      createForm.reset();
+                      loadProjectMilestones(currentProjectId);
+                  } else {
+                      alert(res.message || 'Error creating milestone.');
+                  }
+              } catch (err) {
+                  alert('Server communication error.');
+              }
+          });
+      }
+  });
+
+  async function loadProjectMilestones(projectId) {
+      const container = document.getElementById('milestonesContainer');
+      try {
+          const res = await fetch(`api/projects/milestones.php?project_id=${projectId}`);
+          const data = await res.json();
+
+          if (data.status === 200 && data.milestones && data.milestones.length > 0) {
+              container.innerHTML = data.milestones.map((m, idx) => {
+                  const isReleased = m.status === 'completed' || m.status === 'released';
+                  const isRequested = m.status === 'release_requested';
+
+                  return `
+                      <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold ${isReleased ? 'bg-emerald-100 text-emerald-800' : isRequested ? 'bg-amber-100 text-amber-800' : 'bg-stone-100 text-stone-700'} px-2.5 py-0.5 rounded">Milestone ${idx + 1}</span>
+                            <span class="text-xs font-bold text-stone-500">${m.due_date ? 'Target: ' + m.due_date : 'Ongoing'}</span>
+                          </div>
+                          <h3 class="text-lg font-serif font-bold text-stone-900">${m.title}</h3>
+                          <p class="text-xs text-stone-600">${m.description || 'No detailed description provided.'}</p>
+                        </div>
+                        <div class="flex items-center gap-6">
+                          <div class="text-right">
+                            <span class="block text-xs text-stone-500 font-semibold">Value</span>
+                            <span class="text-lg font-bold ${isReleased ? 'text-emerald-700' : 'text-stone-900'}">৳${Number(m.amount || 0).toLocaleString()}</span>
+                          </div>
+                          ${
+                            isReleased ? `<span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-xl">Fund Released</span>` :
+                            isRequested ? `<span class="text-xs font-bold bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl">Release Pending Approval</span>` :
+                            `<button onclick="requestEscrowRelease(${m.milestone_id})" class="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-4 py-2.5 rounded-xl transition shadow-sm">Request Escrow Release</button>`
+                          }
+                        </div>
+                      </div>
+                  `;
+              }).join('');
+          } else {
+              container.innerHTML = `
+                  <div class="bg-white rounded-2xl border border-stone-200 p-8 text-center space-y-3">
+                      <p class="text-stone-500 text-xs">No milestones found for this project yet.</p>
+                      <button onclick="document.getElementById('addMilestoneModal').classList.remove('hidden')" class="text-xs bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-bold px-4 py-2 rounded-lg transition">Create First Milestone</button>
+                  </div>
+              `;
+          }
+      } catch (err) {
+          container.innerHTML = `<div class="p-6 text-center text-xs text-rose-600 bg-rose-50 rounded-2xl border border-rose-200">Unable to load project milestones.</div>`;
+      }
+  }
+
+  async function requestEscrowRelease(milestoneId) {
+      if (!confirm("Are you sure you want to request Escrow fund release for this milestone?")) return;
+
+      const formData = new FormData();
+      formData.append('action', 'update_status');
+      formData.append('milestone_id', milestoneId);
+      formData.append('status', 'release_requested');
+
+      try {
+          const res = await fetch('api/projects/milestones.php', {
+              method: 'POST',
+              body: formData
+          }).then(r => r.json());
+
+          if (res.status === 200) {
+              alert("Fund Release Request Sent to Admin & Investor!");
+              loadProjectMilestones(currentProjectId);
+          } else {
+              alert(res.message || "Failed to submit request.");
+          }
+      } catch (err) {
+          alert("Server error.");
+      }
+  }
+  </script>
+</body>
+</html>

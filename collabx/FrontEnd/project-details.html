@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Management | CollabX</title>
+  
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="./tailwind-config.js"></script>
+  
+  <!-- Custom Fonts & Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-require-role="idea_owner,admin" class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-emerald-800 transition duration-300">
+          C
+        </div>
+        <span class="font-serif text-2xl font-bold tracking-tight text-stone-900">CollabX</span>
+      </a>
+
+      <div class="flex items-center gap-6">
+        <a href="ideaowner-dashboard.html" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition duration-300">Back to Dashboard</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+
+    <!-- Project Overview Header Card -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-stone-100 pb-6">
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <h1 class="text-2xl sm:text-3xl font-serif font-bold text-stone-900">AgriTech Supply Hub</h1>
+            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">Funding Phase</span>
+          </div>
+          <p class="text-xs text-stone-500">Category: <span class="font-semibold text-stone-700">AgriTech</span> | Created on: <span class="font-semibold text-stone-700">12 Sep 2026</span></p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="wallet.html" class="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-4 py-2.5 rounded-xl transition">Project Escrow Wallet</a>
+        </div>
+      </div>
+
+      <!-- Budget & Progress -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-stone-50 p-5 rounded-2xl border border-stone-200">
+        <div>
+          <p class="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1">Target Budget</p>
+          <p class="text-2xl font-serif font-bold text-stone-900">৳500,000</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1">Fund Raised</p>
+          <p class="text-2xl font-serif font-bold text-emerald-700">৳350,000</p>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Funding Progress (70%)</p>
+          <div class="w-full bg-stone-200 h-3 rounded-full overflow-hidden">
+            <div class="bg-emerald-700 h-full" style="width: 70%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Management Sections: Funding Offers & Team Applications -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+      <!-- Section 1: Investor Funding Offers -->
+      <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm space-y-6">
+        <div class="flex items-center justify-between border-b border-stone-200 pb-4">
+          <h2 class="text-lg font-serif font-bold text-stone-900">Investor Offers</h2>
+          <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">2 Offers</span>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Offer Card 1 -->
+          <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-stone-900">Tanvir Hossain</h3>
+              <p class="text-xs text-stone-500">Offered Amount: <b class="text-emerald-700">৳250,000</b></p>
+              <span class="text-[10px] text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-block mt-1">Pending Approval</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="alert('Investment Offer Accepted!')" class="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-medium px-3 py-1.5 rounded-lg transition">Accept</button>
+              <button onclick="alert('Investment Offer Declined!')" class="text-xs bg-stone-200 hover:bg-stone-300 text-stone-700 font-medium px-3 py-1.5 rounded-lg transition">Reject</button>
+            </div>
+          </div>
+
+          <!-- Offer Card 2 -->
+          <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-stone-900">Syeda Rahaman</h3>
+              <p class="text-xs text-stone-500">Offered Amount: <b class="text-emerald-700">৳100,000</b></p>
+              <span class="text-[10px] text-emerald-800 font-semibold bg-emerald-100 px-2 py-0.5 rounded inline-block mt-1">Accepted</span>
+            </div>
+            <span class="text-xs font-semibold text-stone-400">Escrowed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Manpower Applications -->
+      <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm space-y-6">
+        <div class="flex items-center justify-between border-b border-stone-200 pb-4">
+          <h2 class="text-lg font-serif font-bold text-stone-900">Team Applications</h2>
+          <span class="text-xs bg-stone-100 text-stone-800 font-bold px-2.5 py-1 rounded-full">1 Pending</span>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Applicant Card 1 -->
+          <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-stone-900">Mahmudul Hasan</h3>
+              <p class="text-xs text-stone-600">Applied Role: <b class="text-stone-800">Full-Stack Web Dev</b></p>
+              <p class="text-[11px] text-emerald-700 font-medium">Skill Match: 95% | ★ 5.0 Rating</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="alert('Applicant Hired for Project!')" class="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-medium px-3 py-1.5 rounded-lg transition">Hire</button>
+              <button onclick="alert('Application Rejected.')" class="text-xs bg-stone-200 hover:bg-stone-300 text-stone-700 font-medium px-3 py-1.5 rounded-lg transition">Reject</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

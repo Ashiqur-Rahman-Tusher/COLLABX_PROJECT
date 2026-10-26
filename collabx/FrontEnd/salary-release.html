@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Release Team Salary | CollabX</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-require-role="idea_owner" class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm">C</div>
+        <span class="font-serif text-2xl font-bold text-stone-900">CollabX</span>
+      </a>
+<!-- আগে এমন ছিল: <a href="ideaowner-dashboard.html" ...>Back to Dashboard</a> -->
+
+<a href="javascript:void(0)" onclick="goToDashboard()" class="text-gray-600 hover:text-gray-900 font-medium">Back to Dashboard</a>    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+
+    <div class="border-b border-stone-200 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-serif font-bold text-stone-900">Team Salary Disbursement</h1>
+        <p class="text-sm text-stone-600">Release monthly salaries or milestone compensation to team members from Escrow.</p>
+      </div>
+      <div class="bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-2xl text-xs">
+        <span class="text-stone-500 block">Available Project Escrow Balance</span>
+        <span class="text-lg font-bold text-emerald-700" id="escrowBalance">৳0</span>
+      </div>
+    </div>
+
+    <!-- Salary List -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm space-y-6">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stone-200 text-xs font-bold uppercase text-stone-500">
+              <th class="py-3 px-4">Team Member</th>
+              <th class="py-3 px-4">Role / Project</th>
+              <th class="py-3 px-4">Contract Amount</th>
+              <th class="py-3 px-4">Period</th>
+              <th class="py-3 px-4 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-100 text-sm" id="salaryTableBody">
+            <tr>
+              <td colspan="5" class="py-8 text-center text-xs text-stone-400">Loading data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+<script src="assets/js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Guard check (Idea Owner এবং Admin উভয়কেই অনুমতি দিন)
+    if (typeof App !== 'undefined' && App.guard) {
+        await App.guard(['idea_owner', 'admin', 'super_admin']);
+    }
+
+    // 2. Load Salary Data
+    loadSalaryData();
+});
+
+// ড্যাশবোর্ডে ফেরার নিখুঁত ফাংশন
+function goToDashboard() {
+    // ১. ইউজার আগে যে ড্যাশবোর্ড থেকে এসেছে সেখানে পাঠাবে
+    if (document.referrer && document.referrer.includes('admin-dashboard')) {
+        window.location.href = 'admin-dashboard.html';
+        return;
+    }
+    if (document.referrer && document.referrer.includes('ideaowner-dashboard')) {
+        window.location.href = 'ideaowner-dashboard.html';
+        return;
+    }
+
+    // ২. রেফারার না থাকলে Root-এর check_auth.php থেকে সেশন চেক করবে
+    fetch('check_auth.php')
+        .then(r => r.json())
+        .then(data => {
+            const role = (data.role || data.user_type || '').toLowerCase();
+            if (role.includes('admin')) {
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                window.location.href = 'ideaowner-dashboard.html';
+            }
+        })
+        .catch(() => {
+            // কোনো কারণে ফেইল করলে এডমিন ড্যাশবোর্ডে পাঠাবে
+            window.location.href = 'admin-dashboard.html';
+        });
+}
+
+async function loadSalaryData() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('project_id');
+
+        let apiUrl = 'api/ideaowner/salary.php';
+        if (projectId) {
+            apiUrl += `?project_id=${encodeURIComponent(projectId)}`;
+        }
+
+        const res = await fetch(apiUrl).then(r => r.json());
+        if (res && (res.status === 200 || res.status === 'success')) {
+            const balanceElem = document.getElementById('escrowBalance');
+            if (balanceElem) {
+                const balance = res.escrowBalance !== undefined ? res.escrowBalance : (res.balance || 0);
+                balanceElem.innerText = `৳${Number(balance).toLocaleString()}`;
+            }
+
+            const membersList = res.members || res.data || [];
+            renderMembers(membersList);
+        } else {
+            renderMembers([]);
+        }
+    } catch (err) {
+        console.error('Error loading salary data:', err);
+        renderMembers([]);
+    }
+}
+
+function renderMembers(members) {
+    const tbody = document.getElementById('salaryTableBody');
+    if (!tbody) return;
+
+    if (!members || members.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-xs text-stone-400">ডাটাবেজে কোনো একসেপ্ট হওয়া টিম মেম্বার পাওয়া যায়নি।</td></tr>`;
+        return;
+    }
+
+    const currentMonth = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+
+    tbody.innerHTML = members.map(m => {
+        const memberName = m.member_name || m.name || 'Team Member';
+        const roleOrProject = m.project_title || m.project_name || m.role || 'Team Member';
+        const salaryAmount = m.expected_salary || m.contract_amount || m.amount || 0;
+        const userId = m.user_id || m.id || 0;
+        const projectId = m.project_id || 0;
+
+        return `
+            <tr class="hover:bg-stone-50/80 transition">
+                <td class="py-4 px-4 font-semibold text-stone-900">
+                    ${memberName}
+                    <p class="text-xs text-stone-500 font-normal">Active Member</p>
+                </td>
+                <td class="py-4 px-4 text-stone-700">${roleOrProject}</td>
+                <td class="py-4 px-4 font-bold text-stone-900">৳${Number(salaryAmount).toLocaleString()}</td>
+                <td class="py-4 px-4 text-xs font-semibold text-stone-600">${m.period || currentMonth}</td>
+                <td class="py-4 px-4 text-right">
+                    <button onclick="releaseSalary(${userId}, ${projectId}, ${salaryAmount})" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs px-4 py-2 rounded-xl transition shadow-sm">
+                        Release Salary
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function releaseSalary(userId, projectId, amount) {
+    if (!confirm('আপনি কি নিশ্চিত যে এই বেতনটি রিলিজ করতে চান?')) return;
+
+    try {
+        const res = await fetch('api/ideaowner/salary.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userId,
+                project_id: projectId,
+                amount: amount
+            })
+        }).then(r => r.json());
+
+        if (res.status === 200 || res.status === 'success') {
+            alert('বেতন সফলভাবে রিলিজ হয়েছে!');
+            loadSalaryData();
+        } else {
+            alert(res.message || 'বেতন রিলিজ করতে ব্যর্থ হয়েছে।');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('সার্ভারে সমস্যা হয়েছে!');
+    }
+}
+</script>
+</body>
+</html>

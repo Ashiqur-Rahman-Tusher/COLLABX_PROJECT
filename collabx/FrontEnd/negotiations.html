@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms & Deal Negotiation | CollabX</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-require-role="any" class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm">C</div>
+        <span class="font-serif text-2xl font-bold text-stone-900">CollabX</span>
+      </a>
+      <a href="manage-requests.html" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition">Back to Requests</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+
+    <div class="border-b border-stone-200 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-serif font-bold text-stone-900">Deal Term Negotiation</h1>
+        <p class="text-sm text-stone-600">Negotiate equity, milestones, and compensation terms before finalizing agreement.</p>
+      </div>
+      <span class="text-xs font-bold bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 w-fit">In Negotiation</span>
+    </div>
+
+    <!-- Active Negotiation Card -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm space-y-6">
+      
+      <!-- Dynamic Proposal History Section -->
+      <div class="space-y-4 text-xs">
+        <h3 class="font-bold uppercase tracking-wider text-stone-500 border-b border-stone-100 pb-2">Proposal History</h3>
+        
+        <div id="proposal-history" class="space-y-3">
+          <p class="text-stone-400 text-center py-4">Loading negotiation history...</p>
+        </div>
+      </div>
+
+      <!-- New Counter Proposal Form -->
+      <form id="negotiationForm" onsubmit="submitOffer(event)" class="space-y-4 pt-4 border-t border-stone-100">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-stone-600">Submit New Counter Terms</h4>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 mb-1">Proposed Monthly Salary (৳)</label>
+            <input type="number" id="proposed_salary" placeholder="e.g. 25000" class="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-xs transition" required>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 mb-1">Proposed Equity Share (%)</label>
+            <input type="number" step="0.01" id="proposed_percentage" placeholder="e.g. 1.5" class="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-xs transition" required>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="submit" class="bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs px-5 py-3 rounded-xl transition">
+            Send Counter Proposal
+          </button>
+          <a id="btnGenerateAgreement" href="manage-agreement.html" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs px-5 py-3 rounded-xl shadow-sm transition">
+            Accept Current Terms & Generate Agreement →
+          </a>
+        </div>
+      </form>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('project_id') || 1; 
+    const currentUser = JSON.parse(localStorage.getItem('user')) || { user_id: 1, role: 'investor' };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadNegotiations();
+        
+        // Update Agreement Button URL with Project ID
+        const btnAgreement = document.getElementById('btnGenerateAgreement');
+        if(btnAgreement) {
+            btnAgreement.href = `manage-agreement.html?project_id=${projectId}`;
+        }
+    });
+
+    // 1. Fetch and Display Negotiation Data
+    function loadNegotiations() {
+        fetch(`api/agreements/negotiate.php?action=get&project_id=${projectId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 200) {
+                    renderNegotiationHistory(data.negotiations);
+                } else {
+                    document.getElementById('proposal-history').innerHTML = `<p class="text-stone-500 text-center py-2">${data.message}</p>`;
+                }
+            })
+            .catch(err => {
+                console.error("Error loading negotiations:", err);
+                document.getElementById('proposal-history').innerHTML = `<p class="text-red-500 text-center py-2">Error connecting to server.</p>`;
+            });
+    }
+
+    function renderNegotiationHistory(items) {
+        const container = document.getElementById('proposal-history');
+        if (!container) return;
+
+        if (!items || items.length === 0) {
+            container.innerHTML = `<div class="p-4 rounded-xl bg-stone-50 border border-stone-200 text-stone-500 text-center">No active negotiation proposal found. Create a new proposal below.</div>`;
+            return;
+        }
+
+        let html = '';
+        items.forEach(item => {
+            const isAccepted = item.status === 'accepted';
+            const isRejected = item.status === 'rejected';
+            
+            let bgClass = "bg-stone-50 border-stone-200";
+            if (isAccepted) bgClass = "bg-emerald-50/80 border-emerald-200 text-emerald-900";
+            if (isRejected) bgClass = "bg-rose-50/80 border-rose-200 text-rose-900";
+
+            html += `
+                <div class="p-4 rounded-xl border ${bgClass} space-y-2">
+                    <div class="flex items-center justify-between font-bold">
+                        <span class="text-stone-900 font-semibold">${item.full_name} (${item.role.toUpperCase()})</span>
+                        <span class="text-xs px-2.5 py-1 rounded-lg ${getStatusBadge(item.status)}">${item.status.toUpperCase()}</span>
+                    </div>
+                    <p class="text-stone-700">
+                        Offered Compensation: <b>৳${parseFloat(item.proposed_salary).toLocaleString()} / month</b> + <b>${item.proposed_percentage}% Equity Share</b>.
+                    </p>
+                    ${item.status === 'pending' ? `
+                        <div class="pt-2 flex gap-2">
+                            <button onclick="updateStatus(${item.negotiation_id}, 'accepted')" class="bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">Accept Terms</button>
+                            <button onclick="updateStatus(${item.negotiation_id}, 'rejected')" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">Reject</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    function getStatusBadge(status) {
+        if (status === 'accepted') return 'bg-emerald-100 text-emerald-800 border border-emerald-300';
+        if (status === 'rejected') return 'bg-rose-100 text-rose-800 border border-rose-300';
+        return 'bg-amber-100 text-amber-800 border border-amber-300';
+    }
+
+    // 2. Submit Counter Offer / New Term
+    function submitOffer(event) {
+        event.preventDefault();
+        const percent = document.getElementById('proposed_percentage').value;
+        const salary = document.getElementById('proposed_salary').value || 0;
+
+        const formData = new FormData();
+        formData.append('project_id', projectId);
+        formData.append('user_id', currentUser.user_id);
+        formData.append('role', currentUser.role);
+        formData.append('proposed_percentage', percent);
+        formData.append('proposed_salary', salary);
+        formData.append('proposed_by', currentUser.role === 'idea_owner' ? 'owner' : 'party');
+
+        fetch('api/agreements/negotiate.php?action=submit_proposal', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if (data.status === 200) {
+                document.getElementById('negotiationForm').reset();
+                loadNegotiations();
+            }
+        })
+        .catch(err => console.error("Error submitting offer:", err));
+    }
+
+    // 3. Accept or Reject Offer
+    function updateStatus(negotiationId, status) {
+        const formData = new FormData();
+        formData.append('negotiation_id', negotiationId);
+        formData.append('status', status);
+
+        fetch('api/agreements/negotiate.php?action=update_status', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if (data.status === 200) {
+                loadNegotiations();
+            }
+        })
+        .catch(err => console.error("Error updating status:", err));
+    }
+  </script>
+</body>
+</html>

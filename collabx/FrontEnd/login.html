@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | CollabX</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-emerald-800 transition duration-300">
+          C
+        </div>
+        <span class="font-serif text-2xl font-bold tracking-tight text-stone-900">CollabX</span>
+      </a>
+      <div class="flex items-center gap-6">
+        <a href="index.html" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition duration-300">Back to Home</a>
+        <a href="register.html" class="text-sm font-semibold bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-2.5 rounded-full shadow-sm transition duration-300">
+          Register
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Login Form Section -->
+  <main class="flex-grow flex items-center justify-center py-12 px-6">
+    <div class="w-full max-w-md bg-white rounded-3xl border border-stone-200 p-8 sm:p-10 shadow-sm">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-serif font-bold text-stone-900 mb-2">Welcome Back</h1>
+        <p class="text-sm text-stone-600">Sign in to manage your startup projects and investments.</p>
+      </div>
+
+      <form id="loginForm" class="space-y-6">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Email Address *</label>
+          <input type="email" id="email" name="email" required placeholder="prome@gmail.com" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600">Password *</label>
+            <a href="forgot-password.html" class="text-xs text-emerald-700 hover:underline font-medium">Forgot Password?</a>
+          </div>
+          <input type="password" id="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+        </div>
+
+        <!-- Role Selector -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Select Login Role Profile *</label>
+          <div class="space-y-2">
+            
+            <label class="flex items-center justify-between p-3 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer hover:border-emerald-700 transition">
+              <div class="flex items-center gap-3">
+                <input type="radio" name="role" value="idea_owner" class="accent-emerald-700">
+                <span class="text-xs font-bold text-stone-800">Idea Owner</span>
+              </div>
+              <span class="text-[10px] text-stone-500">Post & Manage Projects</span>
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer hover:border-emerald-700 transition">
+              <div class="flex items-center gap-3">
+                <input type="radio" name="role" value="investor" checked class="accent-emerald-700">
+                <span class="text-xs font-bold text-stone-800">Investor</span>
+              </div>
+              <span class="text-[10px] text-stone-500">Fund Projects & Track ROI</span>
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer hover:border-emerald-700 transition">
+              <div class="flex items-center gap-3">
+                <input type="radio" name="role" value="manpower" class="accent-emerald-700">
+                <span class="text-xs font-bold text-stone-800">Manpower / Skill Team</span>
+              </div>
+              <span class="text-[10px] text-stone-500">Apply with Skills & Earn</span>
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer hover:border-emerald-700 transition">
+              <div class="flex items-center gap-3">
+                <input type="radio" name="role" value="admin" class="accent-emerald-700">
+                <span class="text-xs font-bold text-stone-800">Platform Admin</span>
+              </div>
+              <span class="text-[10px] text-stone-500">Verify Users & Monitor Deals</span>
+            </label>
+
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-3.5 rounded-xl shadow-sm transition duration-300">
+          Sign In
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-xs text-stone-500">
+        Don't have an account? <a href="register.html" class="text-emerald-700 font-semibold hover:underline">Register here</a>
+      </p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+  <!-- Scripts -->
+<script src="assets/js/app.js"></script>
+<script>
+document.getElementById('loginForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) submitBtn.disabled = true;
+
+    // Get input values safely
+    const email = document.querySelector('input[name="email"]')?.value.trim();
+    const password = document.querySelector('input[name="password"]')?.value.trim();
+    const roleInput = document.querySelector('input[name="role"]:checked');
+    const role = roleInput ? roleInput.value : '';
+
+    if (!email || !password || !role) {
+        alert('Please fill in Email, Password, and select a Role!');
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+    }
+
+    try {
+        const response = await fetch('api/auth/login.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: email, password: password, role: role })
+        });
+
+        const res = await response.json();
+
+        if (res.status === 200) {
+            if (typeof App !== 'undefined' && App.toast) App.toast('Login Successful!', 'success');
+            setTimeout(() => {
+                window.location.href = res.redirect || 'investor-dashboard.html';
+            }, 800);
+        } else {
+            alert(res.message || 'Login failed!');
+        }
+    } catch (err) {
+        console.error('Login Error:', err);
+        alert('Server connection error!');
+    } finally {
+        if (submitBtn) submitBtn.disabled = false;
+    }
+});
+</script>
+</body>
+</html>

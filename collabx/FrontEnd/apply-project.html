@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apply for Role | CollabX</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  
+  <!-- Custom Fonts & Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-require-role="manpower" class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-emerald-800 transition duration-300">
+          C
+        </div>
+        <span class="font-serif text-2xl font-bold tracking-tight text-stone-900">CollabX</span>
+      </a>
+
+      <div class="flex items-center gap-6">
+        <a href="manpower-dashboard.html" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition duration-300">Back to Dashboard</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="flex-grow flex items-center justify-center py-12 px-6">
+    <div class="w-full max-w-xl bg-white rounded-3xl border border-stone-200 p-8 sm:p-10 shadow-sm">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-serif font-bold text-stone-900 mb-2">Apply Project Role</h1>
+        <p class="text-sm text-stone-600">Submit your application with portfolio proof to join this startup team.</p>
+      </div>
+
+      <!-- Selected Project Info -->
+      <div class="p-5 rounded-2xl bg-stone-50 border border-stone-200 mb-6 space-y-2">
+        <div class="flex items-center justify-between">
+          <span id="projSector" class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider bg-emerald-100 px-2 py-0.5 rounded">Sector</span>
+          <span class="text-xs font-bold text-emerald-700">95% Skill Match</span>
+        </div>
+        <h3 id="projTitle" class="text-lg font-serif font-bold text-stone-900">Loading Project...</h3>
+        <p id="projRole" class="text-xs text-stone-500">Applying for Role: <b class="text-stone-800">Team Member</b></p>
+      </div>
+
+      <!-- Already Applied Notice Banner (Hidden by default) -->
+      <div id="alreadyAppliedNotice" class="hidden mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold text-center">
+        ⚠️ You have already submitted an application for this project.
+      </div>
+
+      <!-- Application Form -->
+      <form id="applyForm" class="space-y-5">
+        <!-- Expected Compensation / Remuneration -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Expected Compensation / Salary (৳/month) *</label>
+          <input type="number" id="expectedSalary" required placeholder="e.g. 25000" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+        </div>
+
+        <!-- Portfolio Link -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Portfolio Link / GitHub URL *</label>
+          <input type="url" id="portfolioLink" required placeholder="https://github.com/yourprofile" class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition">
+        </div>
+
+        <!-- Cover Letter / Pitch -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Cover Pitch / Why you are a fit *</label>
+          <textarea id="coverNote" rows="4" required placeholder="Describe your relevant experience and how you can contribute to this startup..." class="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-emerald-700 text-sm transition"></textarea>
+        </div>
+
+        <button id="submitBtn" type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-3.5 rounded-xl shadow-sm transition duration-300">
+          Submit Application
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script>
+    let currentProjectId = 0;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Guard check
+      if (window.App && App.guard) {
+        await App.guard(['manpower']);
+      }
+
+      // 2. Get project_id from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      currentProjectId = urlParams.get('project_id') || 1;
+
+      // 3. Load Project details & check application status
+      loadProjectDetails(currentProjectId);
+
+      // 4. Form Submit Handler
+      const form = document.getElementById('applyForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const payload = {
+          project_id: currentProjectId,
+          expected_salary: document.getElementById('expectedSalary').value,
+          portfolio_link: document.getElementById('portfolioLink').value,
+          cover_note: document.getElementById('coverNote').value
+        };
+
+        try {
+          const res = await fetch('api/manpower/apply.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }).then(r => r.json());
+
+          if (res.status === 200 || res.status === 201) {
+            alert('Application Submitted Successfully!');
+            window.location.reload(); // Reload to show blocked state
+          } else {
+            alert(res.message || 'Failed to submit application.');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Something went wrong!');
+        }
+      });
+    });
+
+    async function loadProjectDetails(projectId) {
+      try {
+        const res = await fetch(`api/manpower/apply.php?project_id=${projectId}`).then(r => r.json());
+        
+        if (res && res.status === 200) {
+          // Set Project Information
+          if (res.project) {
+            document.getElementById('projSector').innerText = res.project.category || res.project.sector || 'General Sector';
+            document.getElementById('projTitle').innerText = res.project.title || 'Project Details';
+            if (res.project.role) {
+              document.getElementById('projRole').innerHTML = `Applying for Role: <b class="text-stone-800">${res.project.role}</b>`;
+            }
+          }
+
+          // Check if already applied
+          if (res.already_applied || res.has_applied) {
+            disableApplicationForm();
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load project details', err);
+      }
+    }
+
+    function disableApplicationForm() {
+      // Show yellow warning notice
+      document.getElementById('alreadyAppliedNotice').classList.remove('hidden');
+
+      // Disable inputs
+      document.getElementById('expectedSalary').disabled = true;
+      document.getElementById('portfolioLink').disabled = true;
+      document.getElementById('coverNote').disabled = true;
+
+      // Disable Submit Button & Change Style
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerText = "Already Applied";
+      btn.className = "w-full bg-stone-300 text-stone-500 font-medium py-3.5 rounded-xl cursor-not-allowed shadow-none";
+    }
+  </script>
+</body>
+</html>

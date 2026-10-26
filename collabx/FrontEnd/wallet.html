@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escrow Wallet & Payouts | CollabX</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./tailwind-config.js"></script>
+  
+  <!-- Custom Fonts & Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-require-role="any" class="bg-stone-50 text-stone-900 font-sans antialiased selection:bg-emerald-700 selection:text-white min-h-screen flex flex-col justify-between">
+
+  <!-- Shared Navbar -->
+  <nav class="sticky top-0 z-50 bg-stone-50/90 backdrop-blur-md border-b border-stone-200/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-emerald-800 transition duration-300">
+          C
+        </div>
+        <span class="font-serif text-2xl font-bold tracking-tight text-stone-900">CollabX</span>
+      </a>
+
+      <div class="flex items-center gap-6">
+        <a href="ideaowner-dashboard.html" class="text-sm font-medium text-stone-600 hover:text-stone-900 transition duration-300">Back to Dashboard</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Wallet Content -->
+  <main class="max-w-7xl mx-auto px-6 py-10 flex-grow w-full space-y-10">
+
+    <!-- Header & Action Buttons -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-6">
+      <div>
+        <h1 class="text-3xl font-serif font-bold text-stone-900">CollabX Escrow Wallet</h1>
+        <p class="text-sm text-stone-600">Secure funds management, milestone payouts, and transparent transactions.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="openModal('depositModal')" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs px-5 py-3 rounded-xl shadow-sm transition cursor-pointer">
+          + Add Funds / Deposit
+        </button>
+        <button onclick="openModal('withdrawModal')" class="bg-stone-200 hover:bg-stone-300 text-stone-800 font-semibold text-xs px-5 py-3 rounded-xl transition cursor-pointer">
+          Withdraw Payout
+        </button>
+      </div>
+    </div>
+
+    <!-- Balance Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Available Balance -->
+      <div class="p-6 rounded-2xl bg-white border border-stone-200 shadow-sm flex flex-col justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">Available Balance</span>
+        <div class="flex items-baseline justify-between">
+          <span id="availBal" class="text-3xl font-serif font-bold text-emerald-700">৳0</span>
+          <span class="text-xs font-medium text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full">Ready for Use</span>
+        </div>
+      </div>
+
+      <!-- Locked in Escrow -->
+      <div class="p-6 rounded-2xl bg-white border border-stone-200 shadow-sm flex flex-col justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">Locked in Escrow Vault</span>
+        <div class="flex items-baseline justify-between">
+          <span id="lockedBal" class="text-3xl font-serif font-bold text-amber-600">৳0</span>
+          <span class="text-xs font-medium text-amber-800 bg-amber-100 px-2.5 py-1 rounded-full">Milestone Safe</span>
+        </div>
+      </div>
+
+      <!-- Total Released / Paid Out -->
+      <div class="p-6 rounded-2xl bg-white border border-stone-200 shadow-sm flex flex-col justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">Total Released Payouts</span>
+        <div class="flex items-baseline justify-between">
+          <span id="releasedBal" class="text-3xl font-serif font-bold text-stone-900">৳0</span>
+          <span id="settledCount" class="text-xs text-stone-500">Settled</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Project Milestones Status -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-serif font-bold text-stone-900">Project Escrow Milestones</h2>
+          <p class="text-xs text-stone-500">Funds released sequentially upon completing verified milestone stages.</p>
+        </div>
+        <span id="projectTitleBadge" class="text-xs font-bold bg-stone-100 text-stone-800 px-3 py-1.5 rounded-xl border border-stone-200">Loading Project...</span>
+      </div>
+
+      <div id="milestonesGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <p class="text-xs text-stone-400 col-span-3">Loading Milestones...</p>
+      </div>
+    </div>
+
+    <!-- Transaction History Table -->
+    <div class="bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm">
+      <h2 class="text-xl font-serif font-bold text-stone-900 mb-6">Recent Ledger & Transactions</h2>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stone-200 text-xs font-bold uppercase tracking-wider text-stone-500">
+              <th class="py-3 px-4">Title</th>
+              <th class="py-3 px-4">Project</th>
+              <th class="py-3 px-4">Type</th>
+              <th class="py-3 px-4">Amount</th>
+              <th class="py-3 px-4 text-right">Status</th>
+            </tr>
+          </thead>
+          <tbody id="txTableBody" class="divide-y divide-stone-100 text-sm">
+            <tr><td colspan="5" class="py-4 text-center text-xs text-stone-400">Loading Transactions...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= Deposit Modal ================= -->
+  <div id="depositModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+      <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+        <h3 class="text-lg font-serif font-bold text-stone-900">+ Deposit / Add Funds</h3>
+        <button onclick="closeModal('depositModal')" class="text-stone-400 hover:text-stone-700 font-bold text-lg cursor-pointer">✕</button>
+      </div>
+
+      <form id="depositForm" onsubmit="handleDeposit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Amount (BDT)</label>
+          <input type="number" id="depositAmount" placeholder="e.g. 50000" min="10" required class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Select Payment Gateway</label>
+          <select id="paymentMethod" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white">
+            <option value="bkash">bKash Online Payment</option>
+            <option value="nagad">Nagad Direct</option>
+            <option value="card">Visa / Mastercard</option>
+            <option value="bank">Bank Wire Transfer</option>
+          </select>
+        </div>
+
+        <button type="submit" id="depBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-3 rounded-xl text-xs transition shadow-sm cursor-pointer">
+          Confirm Deposit
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= Withdraw Modal ================= -->
+  <div id="withdrawModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+      <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+        <h3 class="text-lg font-serif font-bold text-stone-900">Withdraw Funds</h3>
+        <button onclick="closeModal('withdrawModal')" class="text-stone-400 hover:text-stone-700 font-bold text-lg cursor-pointer">✕</button>
+      </div>
+
+      <form id="withdrawForm" onsubmit="handleWithdraw(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Withdrawal Amount (BDT)</label>
+          <input type="number" id="withdrawAmount" placeholder="e.g. 10000" min="10" required class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Withdrawal Method</label>
+          <select id="withdrawMethod" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 bg-white">
+            <option value="bkash">bKash Personal / Agent</option>
+            <option value="nagad">Nagad Personal</option>
+            <option value="bank">Bank Account</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Account / Mobile Number</label>
+          <input type="text" id="withdrawAccount" placeholder="017xxxxxxxx or Bank A/C details" required class="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+        </div>
+
+        <button type="submit" id="wdBtn" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-semibold py-3 rounded-xl text-xs transition cursor-pointer">
+          Submit Request
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-stone-100 border-t border-stone-200 py-6 text-center text-xs text-stone-500">
+    © 2026 CollabX Platform. All rights reserved.
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script>
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function getCurrentUserId() {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser);
+          return parsed.user_id || parsed.id || 1;
+        } catch (e) {}
+      }
+      return 1;
+    }
+
+    // Dynamic Data Fetching (Finance Wallet + Escrow Vault combined)
+async function loadEscrowWalletData() {
+  const userId = getCurrentUserId();
+
+  try {
+    // 1. Fetch main wallet balance & transactions from finance API (where deposit saves)
+    let finData = {};
+    try {
+      const finRes = await fetch(`api/finance/get_wallet_details.php?user_id=${userId}`);
+      finData = await finRes.json();
+    } catch (e) {
+      console.warn('Finance API fetch error:', e);
+    }
+
+    // 2. Fetch Escrow vault data from escrow API
+    let escData = {};
+    try {
+      const escRes = await fetch(`api/wallet/escrow.php?user_id=${userId}`);
+      escData = await escRes.json();
+    } catch (e) {
+      console.warn('Escrow API fetch error:', e);
+    }
+
+    // Parse values from API responses
+    const mainBalance = Number(finData.data?.balance ?? finData.balance ?? 0);
+    const lockedBalance = Number(escData.escrow?.locked_amount ?? 0);
+    const transactions = finData.data?.transactions || finData.transactions || escData.transactions || [];
+
+    // Update UI Cards
+    document.getElementById('availBal').innerText = '৳' + mainBalance.toLocaleString();
+    document.getElementById('lockedBal').innerText = '৳' + lockedBalance.toLocaleString();
+    document.getElementById('releasedBal').innerText = '৳' + mainBalance.toLocaleString();
+    document.getElementById('projectTitleBadge').innerText = escData.escrow?.project_title || 'Active Wallet';
+
+    // Render Transactions Table
+    const txBody = document.getElementById('txTableBody');
+    if (transactions && transactions.length > 0) {
+      txBody.innerHTML = '';
+      let count = 0;
+
+      transactions.forEach((tx) => {
+        count++;
+        const isCredit = (tx.type || '').toLowerCase() === 'deposit';
+        const badgeClass = isCredit ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+
+        const row = `
+          <tr class="hover:bg-stone-50/80 transition">
+            <td class="py-4 px-4 font-semibold text-stone-900">${tx.reference || tx.title || 'Deposit / Transaction'}</td>
+            <td class="py-4 px-4 text-xs font-semibold text-stone-600">${tx.created_at || tx.project || 'General'}</td>
+            <td class="py-4 px-4 text-xs text-stone-500 font-mono uppercase">${tx.type || 'DEPOSIT'}</td>
+            <td class="py-4 px-4 font-bold text-stone-900">৳${Number(tx.amount || 0).toLocaleString()}</td>
+            <td class="py-4 px-4 text-right">
+              <span class="px-2.5 py-1 text-xs font-bold rounded-full ${badgeClass}">${tx.status || 'COMPLETED'}</span>
+            </td>
+          </tr>
+        `;
+        txBody.innerHTML += row;
+      });
+
+      document.getElementById('settledCount').innerText = `${count} Items`;
+    } else {
+      txBody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-xs text-stone-400">No transactions recorded yet.</td></tr>`;
+    }
+
+    // Render Escrow / Milestone Summary Cards
+    const mGrid = document.getElementById('milestonesGrid');
+    if (transactions && transactions.length > 0) {
+      mGrid.innerHTML = '';
+      transactions.slice(0, 3).forEach((tx) => {
+        const mCard = `
+          <div class="p-4 rounded-2xl border bg-emerald-50/50 border-emerald-200 space-y-2">
+            <div class="flex items-center justify-between text-xs font-bold">
+              <span class="text-stone-900">${tx.reference || tx.title || 'Transaction'}</span>
+              <span class="text-emerald-700 uppercase">${tx.type || 'COMPLETED'}</span>
+            </div>
+            <p class="text-lg font-serif font-bold text-stone-900">৳${Number(tx.amount || 0).toLocaleString()}</p>
+            <p class="text-[11px] text-stone-500">${tx.created_at || ''}</p>
+          </div>
+        `;
+        mGrid.innerHTML += mCard;
+      });
+    } else {
+      mGrid.innerHTML = `<p class="text-xs text-stone-500 col-span-3">No active milestones found.</p>`;
+    }
+
+  } catch (err) {
+    console.error('Wallet Data Fetch Error:', err);
+  }
+}
+    // 2. Deposit Submission
+    async function handleDeposit(e) {
+      e.preventDefault();
+      const amt = Number(document.getElementById('depositAmount').value);
+      const method = document.getElementById('paymentMethod').value;
+      const userId = getCurrentUserId();
+      const btn = document.getElementById('depBtn');
+
+      if (amt <= 0) return;
+
+      try {
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+
+        const response = await fetch('api/finance/deposit.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            amount: amt,
+            payment_method: method
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 200 || result.success) {
+          alert(result.message || `Successfully deposited ৳${amt.toLocaleString()} via ${method.toUpperCase()}!`);
+          closeModal('depositModal');
+          document.getElementById('depositForm').reset();
+          loadEscrowWalletData();
+        } else {
+          alert(result.message || 'Deposit failed.');
+        }
+      } catch (err) {
+        console.error('Deposit Error:', err);
+        alert('Deposit request failed.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Confirm Deposit";
+      }
+    }
+
+    // 3. Withdrawal Submission
+    async function handleWithdraw(e) {
+      e.preventDefault();
+      const amt = Number(document.getElementById('withdrawAmount').value);
+      const method = document.getElementById('withdrawMethod').value;
+      const acc = document.getElementById('withdrawAccount').value;
+      const userId = getCurrentUserId();
+      const btn = document.getElementById('wdBtn');
+
+      if (amt <= 0) return;
+
+      try {
+        btn.disabled = true;
+        btn.innerText = "Submitting...";
+
+        const response = await fetch('api/finance/request_withdrawal.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            amount: amt,
+            method: method,
+            account: acc
+          })
+        });
+
+        const result = await response.json();
+        alert(result.message || `Withdrawal request of ৳${amt.toLocaleString()} to (${acc}) submitted successfully!`);
+        closeModal('withdrawModal');
+        document.getElementById('withdrawForm').reset();
+        loadEscrowWalletData();
+      } catch (err) {
+        console.error('Withdraw Error:', err);
+        alert('Withdrawal request failed.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Submit Request";
+      }
+    }
+
+    function getCurrentUserId() {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      const parsed = JSON.parse(storedUser);
+      // user_id, id বা user.user_id যাই থাকুক চেক করবে
+      return parsed.user_id || parsed.id || parsed.user?.id || 9; 
+    } catch (e) {}
+  }
+  return 9; // Investor Mahin-er default ID 9
+}
+
+    // Auto Load on Page Load
+    document.addEventListener('DOMContentLoaded', loadEscrowWalletData);
+  </script>
+</body>
+</html>
